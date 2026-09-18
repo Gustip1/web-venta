@@ -30,17 +30,8 @@ export default function RegisterPage() {
       return;
     }
 
+    // El perfil lo crea el trigger on_auth_user_created en la base de datos.
     if (data.user) {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert({ id: data.user.id, role: 'user', display_name: displayName });
-
-      if (profileError) {
-        setError('Error creando perfil: ' + profileError.message);
-        setLoading(false);
-        return;
-      }
-
       router.push('/account');
     }
 

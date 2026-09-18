@@ -2,12 +2,13 @@
 
 Todo lo que tenés que hacer para que tu tienda esté online, de principio a fin.
 
-No hace falta saber programar. Son **9 pasos** y lleva alrededor de **40 minutos** la primera vez.
+No hace falta saber programar. Son **10 pasos** y lleva alrededor de **1 hora** la primera vez.
 
 **Lo que vas a necesitar:**
 
 - Una computadora con internet
 - Un mail
+- Una cuenta de **Claude** (plan Pro o superior) para usar el asistente dentro del editor
 - El dominio que compraste (si todavía no lo tenés, podés hacer todo igual y conectarlo después)
 
 Todo lo que usamos acá es **gratis** para empezar: Supabase (la base de datos) y Vercel (donde vive la web)
@@ -19,6 +20,7 @@ tienen planes gratuitos que alcanzan de sobra para arrancar.
 
 | Paso | Qué hacés | Tiempo |
 |---|---|---|
+| [0](#paso-0-preparar-tu-computadora) | Preparar tu computadora (VS Code + Claude) | 15 min |
 | [1](#paso-1-crear-la-cuenta-de-supabase) | Crear la cuenta de Supabase | 5 min |
 | [2](#paso-2-crear-la-base-de-datos) | Crear la base de datos | 5 min |
 | [3](#paso-3-copiar-tus-3-claves) | Copiar tus 3 claves | 3 min |
@@ -28,6 +30,63 @@ tienen planes gratuitos que alcanzan de sobra para arrancar.
 | [7](#paso-7-configurar-tu-tienda) | Configurar tu tienda | 10 min |
 | [8](#paso-8-conectar-tu-dominio) | Conectar tu dominio | 10 min |
 | [9](#paso-9-cargar-tus-productos) | Cargar tus productos | — |
+
+---
+
+## Paso 0: Preparar tu computadora
+
+Vas a instalar dos cosas: **Visual Studio Code**, que es el programa donde se abre el proyecto, y
+**Claude**, un asistente que vive adentro de ese programa. Si algo no te sale o no entendés un paso de
+esta guía, se lo preguntás a Claude en español, como si fuera un chat, y te lo resuelve o te lo explica.
+
+### 0.1 Instalar Visual Studio Code
+
+1. Entrá a **[code.visualstudio.com](https://code.visualstudio.com)** y tocá **Download**.
+2. Instalalo como cualquier programa:
+   - **Mac**: abrí el archivo descargado y arrastrá *Visual Studio Code* a la carpeta **Aplicaciones**.
+   - **Windows**: abrí el instalador y tocá **Siguiente** hasta el final (dejá todo como viene).
+3. Abrilo.
+
+### 0.2 Instalar Git
+
+Git es lo que permite descargar el proyecto y subirlo a GitHub.
+
+- **Mac**: no hagas nada. La primera vez que haga falta, la Mac te va a ofrecer instalarlo: tocá **Instalar**.
+- **Windows**: descargalo de **[git-scm.com](https://git-scm.com/download/win)** e instalalo tocando
+  **Next** hasta el final.
+
+### 0.3 Instalar la extensión de Claude
+
+1. En Visual Studio Code, tocá el ícono de los **cuatro cuadraditos** en la barra de la izquierda
+   (se llama **Extensions**).
+2. En el buscador escribí **Claude Code**.
+3. Elegí la que publica **Anthropic** (tiene el tilde azul de verificado) y tocá **Install**.
+4. Va a aparecer el ícono de Claude en la barra lateral. Tocalo y tocá **Sign in**: se abre el navegador
+   para que entres con tu cuenta de Claude.
+
+> 💡 **Cómo usar a Claude:** escribile lo que necesitás en español, por ejemplo
+> *"levantá la tienda en mi computadora"*, *"¿por qué me da este error?"* o *"cambiá el color del botón
+> de comprar"*. Antes de tocar archivos o correr comandos te pide permiso.
+
+### 0.4 Descargar el proyecto
+
+El proyecto está guardado en GitHub de forma privada, así que primero necesitás acceso:
+
+- Creá una cuenta en **[github.com](https://github.com)** si no tenés, y pasale tu **nombre de usuario**
+  a quien te dio el proyecto.
+- Te va a llegar un mail de GitHub con una invitación: abrilo y tocá **Accept invitation**.
+
+Después:
+
+1. En Visual Studio Code, abrí la paleta de comandos: **Cmd+Shift+P** (Mac) o **Ctrl+Shift+P** (Windows).
+2. Escribí **Git: Clone** y tocá Enter.
+3. Pegá el link del proyecto que te pasaron y tocá Enter.
+   Si te pide iniciar sesión en GitHub, aceptá: se abre el navegador para que entres.
+4. Elegí dónde guardarlo (por ejemplo, el **Escritorio**).
+5. Cuando termine, tocá **Open** para abrir el proyecto.
+
+A partir de acá, cada vez que la guía diga *"abrí el archivo…"*, lo buscás en la columna de la izquierda
+de Visual Studio Code.
 
 ---
 
@@ -98,16 +157,17 @@ GitHub es donde se guarda el código. Vercel lo lee de ahí para publicar tu web
    - Elegí **Private** (así tu código no queda público)
    - **No** marques ninguna de las casillas de abajo
    - Tocá **Create repository**
-3. Ahora subí los archivos. La forma más simple, sin usar la terminal:
-   - En la página que te quedó abierta, tocá **uploading an existing file**
-   - Arrastrá **todas las carpetas y archivos del proyecto**
-   - ⚠️ **No subas la carpeta `node_modules`** (es enorme y no hace falta)
-   - Abajo tocá **Commit changes**
+3. Ahora subí el proyecto que descargaste en el Paso 0. Lo más fácil es pedírselo a Claude en
+   Visual Studio Code:
 
-> 💡 Si sabés usar la terminal, es más rápido así, parado en la carpeta del proyecto:
+   > *"Subí este proyecto al repositorio https://github.com/TU-USUARIO/mi-tienda que acabo de crear"*
+
+   Claude te va a pedir permiso para correr los comandos y, si hace falta, te va a pedir que inicies
+   sesión en GitHub.
+
+> 💡 Si preferís hacerlo vos, en la terminal de Visual Studio Code (menú **Terminal → New Terminal**):
 > ```bash
-> git remote add origin https://github.com/TU-USUARIO/mi-tienda.git
-> git branch -M main
+> git remote set-url origin https://github.com/TU-USUARIO/mi-tienda.git
 > git push -u origin main
 > ```
 
@@ -267,6 +327,14 @@ Los pedidos no llegan por mail: quedan en **`/admin/pedidos`**. Entrá a mirar a
 **Cambié algo en Ajustes y no lo veo**
 Recargá la página de la tienda (Ctrl+F5 o Cmd+Shift+R). Algunos cambios tardan hasta un minuto.
 
+**Me dice "Email not confirmed" al entrar**
+Supabase te mandó un mail de confirmación cuando te registraste: abrilo y tocá el link. Si no te llega,
+en Supabase → **Authentication → Users**, tocá tu usuario y confirmalo desde ahí.
+
+**Me trabé en algo y no sé qué hacer**
+Preguntale a Claude en Visual Studio Code. Contale qué paso de la guía estabas haciendo y pegale el
+mensaje de error tal cual te aparece.
+
 **Cambié una clave en Vercel y sigue igual**
 Después de tocar variables de entorno hay que hacer **Redeploy**: Deployments → los tres puntitos →
 Redeploy. Si no, sigue andando la versión anterior.
@@ -282,6 +350,7 @@ Redeploy. Si no, sigue andando la versión anterior.
 | Actualizar el dólar | `tudominio.com/admin/precios` |
 | Ver la base de datos | [supabase.com](https://supabase.com) → tu proyecto |
 | Ver si la web está online, dominio, claves | [vercel.com](https://vercel.com) → tu proyecto |
+| Cambiar algo del código o pedir ayuda | Visual Studio Code → Claude |
 
 **Las tres cosas que no hay que perder:**
 

@@ -77,7 +77,8 @@ const nextConfig = {
               "base-uri 'self'",
               "form-action 'self'",
               "frame-ancestors 'none'",
-              "upgrade-insecure-requests"
+              // En local el server es http: forzar https rompe CSS/JS (Safari lo aplica incluso en localhost)
+              ...(process.env.NODE_ENV === 'production' ? ['upgrade-insecure-requests'] : [])
             ].join('; ')
           }
         ]

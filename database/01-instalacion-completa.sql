@@ -124,6 +124,35 @@ drop policy if exists "read own profile" on public.profiles;
 create policy "read own profile" on public.profiles
   for select using (id = auth.uid());
 
+alter table public.profiles add column if not exists display_name text;
+
+-- Cada usuario nuevo de auth recibe su perfil automáticamente, se registre por
+-- /register o se cree a mano desde el panel de Supabase.
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (id, display_name)
+  values (new.id, new.raw_user_meta_data->>'display_name')
+  on conflict (id) do nothing;
+  return new;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users
+for each row execute function public.handle_new_user();
+
+-- Perfiles para los usuarios que ya existían antes del trigger.
+insert into public.profiles (id, display_name)
+select u.id, u.raw_user_meta_data->>'display_name'
+from auth.users u
+on conflict (id) do nothing;
+
 -- Tabla de configuración general (ej: tipo de cambio)
 create table if not exists public.settings (
   key text primary key,
@@ -970,6 +999,7 @@ WITH CHECK (
 );
 
 -- Actualización solo para admins
+DROP POLICY IF EXISTS "Admin update access" ON storage.objects;
 CREATE POLICY "Admin update access"
 ON storage.objects FOR UPDATE
 USING (
@@ -1018,6 +1048,7 @@ on conflict (id) do nothing;
 -- 2. Políticas de acceso para el bucket payment-proofs
 
 -- Lectura pública (necesario para que el admin vea las imágenes en el panel)
+DROP POLICY IF EXISTS "Public read payment proofs" ON storage.objects;
 CREATE POLICY "Public read payment proofs"
 ON storage.objects FOR SELECT
 USING (bucket_id = 'payment-proofs');
@@ -1035,6 +1066,7 @@ USING (bucket_id = 'payment-proofs');
 -- );
 
 -- Eliminación solo para admins
+DROP POLICY IF EXISTS "Admin delete payment proofs" ON storage.objects;
 CREATE POLICY "Admin delete payment proofs"
 ON storage.objects FOR DELETE
 USING (
@@ -1077,6 +1109,7 @@ DROP POLICY IF EXISTS "public update shipping_addresses" ON public.shipping_addr
 -- =====================================================
 
 -- Lectura: Solo el propietario o admins pueden ver sus órdenes
+DROP POLICY IF EXISTS "read_own_orders" ON public.orders;
 CREATE POLICY "read_own_orders" ON public.orders
   FOR SELECT
   USING (
@@ -1092,6 +1125,7 @@ CREATE POLICY "read_own_orders" ON public.orders
 
 -- Inserción: Usuarios autenticados pueden crear órdenes
 -- (el checkout puede funcionar sin login, por eso permitimos NULL en user_id)
+DROP POLICY IF EXISTS "insert_orders" ON public.orders;
 CREATE POLICY "insert_orders" ON public.orders
   FOR INSERT
   WITH CHECK (
@@ -1103,6 +1137,7 @@ CREATE POLICY "insert_orders" ON public.orders
   );
 
 -- Actualización: Solo el propietario o admin puede actualizar
+DROP POLICY IF EXISTS "update_own_orders" ON public.orders;
 CREATE POLICY "update_own_orders" ON public.orders
   FOR UPDATE
   USING (
@@ -1126,6 +1161,7 @@ CREATE POLICY "update_own_orders" ON public.orders
   );
 
 -- Delete: Solo admins pueden eliminar órdenes
+DROP POLICY IF EXISTS "delete_orders_admin_only" ON public.orders;
 CREATE POLICY "delete_orders_admin_only" ON public.orders
   FOR DELETE
   USING (
@@ -1139,6 +1175,7 @@ CREATE POLICY "delete_orders_admin_only" ON public.orders
 -- =====================================================
 
 -- Lectura: Solo si pueden ver la orden
+DROP POLICY IF EXISTS "read_order_items" ON public.order_items;
 CREATE POLICY "read_order_items" ON public.order_items
   FOR SELECT
   USING (
@@ -1157,6 +1194,7 @@ CREATE POLICY "read_order_items" ON public.order_items
   );
 
 -- Inserción: Solo al crear la orden (mismo usuario)
+DROP POLICY IF EXISTS "insert_order_items" ON public.order_items;
 CREATE POLICY "insert_order_items" ON public.order_items
   FOR INSERT
   WITH CHECK (
@@ -1172,6 +1210,7 @@ CREATE POLICY "insert_order_items" ON public.order_items
   );
 
 -- Actualización: Solo admin
+DROP POLICY IF EXISTS "update_order_items" ON public.order_items;
 CREATE POLICY "update_order_items" ON public.order_items
   FOR UPDATE
   USING (
@@ -1182,6 +1221,7 @@ CREATE POLICY "update_order_items" ON public.order_items
   );
 
 -- Delete: Solo admin
+DROP POLICY IF EXISTS "delete_order_items" ON public.order_items;
 CREATE POLICY "delete_order_items" ON public.order_items
   FOR DELETE
   USING (
@@ -1195,6 +1235,7 @@ CREATE POLICY "delete_order_items" ON public.order_items
 -- =====================================================
 
 -- Lectura: Solo si pueden ver la orden
+DROP POLICY IF EXISTS "read_shipping_addresses" ON public.shipping_addresses;
 CREATE POLICY "read_shipping_addresses" ON public.shipping_addresses
   FOR SELECT
   USING (
@@ -1213,6 +1254,7 @@ CREATE POLICY "read_shipping_addresses" ON public.shipping_addresses
   );
 
 -- Inserción: Solo al crear la orden
+DROP POLICY IF EXISTS "insert_shipping_addresses" ON public.shipping_addresses;
 CREATE POLICY "insert_shipping_addresses" ON public.shipping_addresses
   FOR INSERT
   WITH CHECK (
@@ -1228,6 +1270,7 @@ CREATE POLICY "insert_shipping_addresses" ON public.shipping_addresses
   );
 
 -- Actualización: Solo el propietario o admin
+DROP POLICY IF EXISTS "update_shipping_addresses" ON public.shipping_addresses;
 CREATE POLICY "update_shipping_addresses" ON public.shipping_addresses
   FOR UPDATE
   USING (
@@ -1246,6 +1289,7 @@ CREATE POLICY "update_shipping_addresses" ON public.shipping_addresses
   );
 
 -- Delete: Solo admin
+DROP POLICY IF EXISTS "delete_shipping_addresses" ON public.shipping_addresses;
 CREATE POLICY "delete_shipping_addresses" ON public.shipping_addresses
   FOR DELETE
   USING (
@@ -1264,6 +1308,7 @@ CREATE POLICY "delete_shipping_addresses" ON public.shipping_addresses
 
 -- Lectura: Solo admins
 DROP POLICY IF EXISTS "read custom orders" ON public.custom_orders;
+DROP POLICY IF EXISTS "read_custom_orders_admin_only" ON public.custom_orders;
 CREATE POLICY "read_custom_orders_admin_only" ON public.custom_orders
   FOR SELECT
   USING (
@@ -1275,11 +1320,13 @@ CREATE POLICY "read_custom_orders_admin_only" ON public.custom_orders
 
 -- Inserción: Permitir público (con rate limiting en API)
 DROP POLICY IF EXISTS "create custom order" ON public.custom_orders;
+DROP POLICY IF EXISTS "insert_custom_orders_public" ON public.custom_orders;
 CREATE POLICY "insert_custom_orders_public" ON public.custom_orders
   FOR INSERT
   WITH CHECK (true);
 
 -- Actualización/Delete: Solo admin
+DROP POLICY IF EXISTS "update_custom_orders_admin_only" ON public.custom_orders;
 CREATE POLICY "update_custom_orders_admin_only" ON public.custom_orders
   FOR UPDATE
   USING (
@@ -1289,6 +1336,7 @@ CREATE POLICY "update_custom_orders_admin_only" ON public.custom_orders
     )
   );
 
+DROP POLICY IF EXISTS "delete_custom_orders_admin_only" ON public.custom_orders;
 CREATE POLICY "delete_custom_orders_admin_only" ON public.custom_orders
   FOR DELETE
   USING (
