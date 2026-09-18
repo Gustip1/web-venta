@@ -27,7 +27,8 @@ En la carpeta `/supabase` están los mismos scripts separados por tema, por si a
 
 ## Buckets de Storage
 
-Los crea `01-instalacion-completa.sql`. Si preferís revisarlos a mano, en **Storage** tenés que ver:
+Los crea `01-instalacion-completa.sql`, así que no tenés que hacer nada. Para confirmarlo, entrá a
+**Storage** y fijate que estén estos dos:
 
 - **`product-images`** — público. Las fotos de los productos y el logo de la tienda.
 - **`payment-proofs`** — privado. Los comprobantes de transferencia que suben los clientes.

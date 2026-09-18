@@ -8,8 +8,9 @@
 --    3. Copiá y pegá TODO este archivo
 --    4. Botón "Run"
 --
---  Tarda unos segundos. Se puede volver a ejecutar sin romper nada: todo está
---  escrito para ser idempotente (create if not exists / drop policy if exists).
+--  Crea las tablas, las funciones, los dos buckets de archivos y las reglas
+--  de seguridad. Tarda unos segundos. Se puede volver a ejecutar sin romper
+--  nada: está escrito para ser idempotente.
 --
 --  Después de correr esto, seguí con 02-datos-iniciales.sql.
 -- ============================================================================
@@ -940,10 +941,10 @@ CREATE INDEX IF NOT EXISTS idx_visits_scroll_depth ON public.analytics_visits(sc
 -- Script para configurar el bucket de imágenes de productos
 -- Ejecutar en Supabase SQL Editor
 
--- 1. Crear el bucket si no existe (hacerlo desde la UI de Supabase Storage)
--- Dashboard → Storage → Create Bucket
--- Nombre: product-images
--- Public: YES
+-- 1. Crear el bucket (antes había que hacerlo a mano desde Storage → Create Bucket).
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
 
 -- 2. Eliminar políticas existentes (si las hay)
 DROP POLICY IF EXISTS "Public read access" ON storage.objects;
@@ -1002,17 +1003,17 @@ WHERE tablename = 'objects' AND schemaname = 'storage';
 
 
 -- ============================================================================
--- Bucket privado de comprobantes de pago
+-- Bucket de comprobantes de pago
 -- (origen: supabase/setup-payment-proofs-bucket.sql)
 -- ============================================================================
 
 -- Script para configurar el bucket de comprobantes de pago
 -- Ejecutar en Supabase SQL Editor
 
--- 1. Crear el bucket desde la UI de Supabase:
---    Dashboard → Storage → Create Bucket
---    Nombre: payment-proofs
---    Public: YES (para que el admin pueda ver las imágenes)
+-- 1. Crear el bucket (antes había que hacerlo a mano desde Storage → Create Bucket).
+insert into storage.buckets (id, name, public)
+values ('payment-proofs', 'payment-proofs', true)
+on conflict (id) do nothing;
 
 -- 2. Políticas de acceso para el bucket payment-proofs
 

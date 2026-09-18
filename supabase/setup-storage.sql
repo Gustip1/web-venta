@@ -1,10 +1,10 @@
 -- Script para configurar el bucket de imágenes de productos
 -- Ejecutar en Supabase SQL Editor
 
--- 1. Crear el bucket si no existe (hacerlo desde la UI de Supabase Storage)
--- Dashboard → Storage → Create Bucket
--- Nombre: product-images
--- Public: YES
+-- 1. Crear el bucket (antes había que hacerlo a mano desde Storage → Create Bucket).
+insert into storage.buckets (id, name, public)
+values ('product-images', 'product-images', true)
+on conflict (id) do nothing;
 
 -- 2. Eliminar políticas existentes (si las hay)
 DROP POLICY IF EXISTS "Public read access" ON storage.objects;

@@ -5,6 +5,9 @@ analíticas propias y personalización de marca (logo y colores) sin tocar una l
 
 ---
 
+> 📘 **¿Es tu primera vez?** Seguí la **[Guía de instalación](GUIA-DE-INSTALACION.md)**: está explicada
+> paso a paso, sin dar por sabido nada, e incluye cómo publicar la web y conectar tu dominio.
+
 ## Puesta en marcha en 5 pasos
 
 Necesitás [Node.js 18 o superior](https://nodejs.org) y una cuenta gratuita en

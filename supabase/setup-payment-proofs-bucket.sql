@@ -1,10 +1,10 @@
 -- Script para configurar el bucket de comprobantes de pago
 -- Ejecutar en Supabase SQL Editor
 
--- 1. Crear el bucket desde la UI de Supabase:
---    Dashboard → Storage → Create Bucket
---    Nombre: payment-proofs
---    Public: YES (para que el admin pueda ver las imágenes)
+-- 1. Crear el bucket (antes había que hacerlo a mano desde Storage → Create Bucket).
+insert into storage.buckets (id, name, public)
+values ('payment-proofs', 'payment-proofs', true)
+on conflict (id) do nothing;
 
 -- 2. Políticas de acceso para el bucket payment-proofs
 
