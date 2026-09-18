@@ -1,0 +1,390 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --header-height: 90px;
+  --header-height-mobile: 76px;
+  /* --font-sans / --font-display las define next/font/google en app/layout.tsx */
+
+  /* Shopify-inspired colors — única fuente de verdad (tailwind.config.ts las referencia via var()) */
+  --color-primary: #008060;
+  --color-primary-hover: #006e52;
+  --color-primary-light: #e6f4f1;
+  --color-accent: #5c6ac4;
+  --color-text: #202223;
+  --color-text-secondary: #6d7175;
+  --color-border: #e1e3e5;
+  --color-surface: #f6f6f7;
+  --color-surface-dark: #f1f2f4;
+}
+
+html, body {
+  font-family: var(--font-sans);
+  /* overflow-x: hidden sin overflow-y explícito hace que el spec de CSS Overflow
+     fuerce overflow-y a "auto" (no puede quedar "visible" si el otro eje no lo
+     está), y sumado a un height fijo eso convierte a body en su propio
+     contenedor de scroll interno en vez de dejar que la página scrollee con la
+     ventana. En iOS eso impide que la barra de direcciones se colapse al
+     scrollear, achicando la pantalla útil todo el tiempo. */
+  overflow-x: hidden;
+  overflow-y: visible;
+}
+
+/* Prevent zoom on input focus on iOS */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Accessible focus outline */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Brand selection color */
+::selection {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Better font rendering */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Display font — apply explicitly, not to all headings */
+.font-display {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+/* Image loading optimization */
+img {
+  image-rendering: -webkit-optimize-contrast;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-surface);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #a1a1a1;
+}
+
+/* Skeleton loading animation */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-surface-dark) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Smooth image transitions */
+.img-loading {
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.img-loaded {
+  opacity: 1;
+}
+
+/* Button hover effects */
+.btn-hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+}
+
+/* Glass effect */
+.glass {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ========== Hero Animations ========== */
+
+/* Animated gradient background */
+.hero-gradient {
+  background: linear-gradient(
+    125deg,
+    #000 0%,
+    #1a0030 25%,
+    #000 50%,
+    #001a33 75%,
+    #000 100%
+  );
+  background-size: 400% 400%;
+  animation: hero-gradient-shift 12s ease-in-out infinite;
+}
+
+@keyframes hero-gradient-shift {
+  0%, 100% { background-position: 0% 50%; }
+  25% { background-position: 100% 0%; }
+  50% { background-position: 100% 100%; }
+  75% { background-position: 0% 100%; }
+}
+
+/* Noise texture overlay */
+.hero-noise {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 256px;
+}
+
+/* Hero text gradient */
+.hero-text-gradient {
+  background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #60a5fa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: hero-text-shimmer 4s ease-in-out infinite;
+}
+
+@keyframes hero-text-shimmer {
+  0%, 100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+/* Product marquee */
+@keyframes marquee-products {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee-products {
+  animation: marquee-products 30s linear infinite;
+}
+
+.animate-marquee-products:hover {
+  animation-play-state: paused;
+}
+
+/* Brand carousel marquee */
+@keyframes marquee-brands {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-33.333%); }
+}
+
+.animate-marquee-brands {
+  animation: marquee-brands 25s linear infinite;
+}
+
+.animate-marquee-brands:hover {
+  animation-play-state: paused;
+}
+
+/* Slow pulse for glow orbs */
+.animate-pulse-slow {
+  animation: pulse-slow 6s ease-in-out infinite;
+}
+
+@keyframes pulse-slow {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(1.1); }
+}
+
+.animation-delay-2000 {
+  animation-delay: 2s;
+}
+
+/* Gentle bounce for scroll indicator */
+.animate-bounce-gentle {
+  animation: bounce-gentle 2.5s ease-in-out infinite;
+}
+
+@keyframes bounce-gentle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(6px); }
+}
+
+/* Category card tilt on hover */
+.category-card-hover {
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease;
+}
+
+.category-card-hover:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+/* Stagger children entrance */
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+
+/* ── Hero instant entrance (CSS-only, no JS state) ── */
+@keyframes hero-enter {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-hero-enter {
+  animation: hero-enter 0.4s ease-out both;
+}
+
+.hero-delay-1 { animation-delay: 50ms; }
+.hero-delay-2 { animation-delay: 100ms; }
+.hero-delay-3 { animation-delay: 150ms; }
+.hero-delay-4 { animation-delay: 200ms; }
+
+/* ── Promo de 3 cuotas activa: resplandor rojo para que llame la atención ── */
+@keyframes promo-glow {
+  0%, 100% { box-shadow: 0 0 0px 0px rgba(220,38,38,0.35); }
+  50%      { box-shadow: 0 0 28px 6px rgba(220,38,38,0.45); }
+}
+
+.animate-promo-glow {
+  animation: promo-glow 2.2s ease-in-out infinite;
+}
+.hero-delay-5 { animation-delay: 250ms; }
+
+/* Cart badge pop when the count changes */
+@keyframes badge-pop {
+  0% { transform: scale(0.5); }
+  60% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.animate-badge-pop {
+  animation: badge-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Announcement marquee pauses on hover so it stays readable */
+.animate-marquee:hover {
+  animation-play-state: paused;
+}
+
+/* Respect users who opt out of motion: collapse animations/transitions to a single instant frame */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Aviso de cuenta (popup bloqueante de la home) ───────────────────────────
+   Es lo primero que ve el visitante, así que la entrada tiene que sentirse
+   deliberada: el fondo funde, la tarjeta sube con un rebote corto y los sellos
+   de proveedor aparecen escalonados. El bloque de prefers-reduced-motion de
+   arriba colapsa todo esto a un frame para quien desactivó las animaciones. */
+@keyframes notice-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes notice-card-in {
+  0%   { opacity: 0; transform: translateY(24px) scale(0.94); }
+  60%  { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes notice-stamp-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.9); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Un único barrido de luz sobre la tarjeta al abrir, para que no se lea plana */
+@keyframes notice-sheen {
+  from { transform: translateX(-120%) rotate(8deg); }
+  to   { transform: translateX(220%) rotate(8deg); }
+}
+
+@keyframes notice-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.45; transform: scale(0.82); }
+}
+
+.animate-notice-overlay { animation: notice-overlay-in 0.35s ease-out both; }
+
+.animate-notice-card {
+  animation: notice-card-in 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-notice-stamp {
+  animation: notice-stamp-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-notice-sheen {
+  animation: notice-sheen 1.5s cubic-bezier(0.4, 0, 0.2, 1) 0.45s both;
+}
+
+.animate-notice-dot { animation: notice-pulse-dot 1.8s ease-in-out infinite; }
+
+/* La tarjeta recibe el foco al abrir para que el lector de pantalla la lea,
+   pero no dibuja el outline global: el anillo tiene que verse en el botón y el
+   link, no alrededor de todo el diálogo. */
+.notice-card:focus-visible { outline: none; }
+
+.notice-stamp-delay-1 { animation-delay: 0.30s; }
+.notice-stamp-delay-2 { animation-delay: 0.38s; }
+.notice-stamp-delay-3 { animation-delay: 0.46s; }
