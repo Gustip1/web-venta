@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !supabaseServiceKey) {
+  if (!supabaseUrl) {
     console.error('Missing Supabase env vars');
     return NextResponse.json({ error: 'Configuración del servidor incompleta' }, { status: 500 });
   }
@@ -32,8 +32,12 @@ export async function POST(req: NextRequest) {
   const files = formData.getAll('files');
   if (!files || files.length === 0) return NextResponse.json([], { status: 200 });
 
-  // Admin client for storage (bypass RLS)
-  const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey);
+  // Con la service key se saltea RLS. Si no está configurada (p. ej. Vercel sin
+  // esa variable), se sube con la sesión del admin: la política "Admin write
+  // access" del bucket product-images ya lo permite.
+  const supabaseAdmin = supabaseServiceKey
+    ? createClient(supabaseUrl, supabaseServiceKey)
+    : supaSSR;
 
   const outputs: { url: string; warning?: string; original?: string }[] = [];
 
