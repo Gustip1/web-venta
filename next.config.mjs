@@ -1,3 +1,16 @@
+import { existsSync, readFileSync } from 'node:fs';
+
+// Next.js no pisa variables que ya existen, aunque estén vacías. Si en Vercel
+// quedaron cargadas sin valor, se completan con las del .env.local del repo.
+if (existsSync('.env.local')) {
+  for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
+    const match = line.match(/^\s*([A-Z0-9_]+)\s*=\s*(.*?)\s*$/);
+    if (match && match[1] !== 'NODE_ENV' && match[2] && !process.env[match[1]]) {
+      process.env[match[1]] = match[2];
+    }
+  }
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
