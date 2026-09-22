@@ -11,6 +11,17 @@ if (existsSync('.env.local')) {
   }
 }
 
+// Si tampoco hay .env.local (Vercel no siempre lo incluye en el build), se usan
+// estos. Son valores públicos: igual viajan al navegador de cada visitante.
+const publicDefaults = {
+  NEXT_PUBLIC_SUPABASE_URL: 'https://ssgojvhhbhzbnjhyasoi.supabase.co',
+  NEXT_PUBLIC_SUPABASE_ANON_KEY:
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNzZ29qdmhoYmh6Ym5qaHlhc29pIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTAwMjYzNjYsImV4cCI6MjEwNTYwMjM2Nn0.H-Hp4J51rcoOqX9XY_SE6lfA3Zk762chKH5-WkXhuyk',
+};
+for (const [key, value] of Object.entries(publicDefaults)) {
+  if (!process.env[key]) process.env[key] = value;
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,

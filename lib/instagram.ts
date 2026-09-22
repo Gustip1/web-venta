@@ -24,6 +24,9 @@ interface RawInstagramMedia {
  * (home, fetch client-side) como por la página /nosotros (server component).
  */
 export async function getInstagramPosts(limit = 8): Promise<InstagramPost[]> {
+  // Sin la clave de servidor (p. ej. build en Vercel sin variables) no hay feed.
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) return [];
+
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!
