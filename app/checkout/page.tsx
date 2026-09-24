@@ -139,7 +139,14 @@ export default function CheckoutPage() {
     setCouponError(null);
   };
 
-  const totalUSD = isCardPayment ? discountedSubtotalUSD * (1 + surchargeRate) : discountedSubtotalUSD;
+  // Envío: el monto se carga en moneda local desde /admin/ajustes y se pasa a
+  // dólares con el mismo valor del dólar que usa el resto de la tienda, porque
+  // la orden guarda los importes en USD.
+  const shippingArs = checkout.fulfillment === 'shipping' ? Math.max(0, storeConfig.shipping.cost) : 0;
+  const shippingUSD = dolarOficial > 0 ? shippingArs / dolarOficial : 0;
+
+  const productsUSD = isCardPayment ? discountedSubtotalUSD * (1 + surchargeRate) : discountedSubtotalUSD;
+  const totalUSD = productsUSD + shippingUSD;
   const totalARS = totalUSD * dolarOficial;
 
   // ─── Step 1 Validation ───
@@ -260,6 +267,7 @@ export default function CheckoutPage() {
         (promoOn
           ? `🔥 *PROMO: SIN recargo*\n`
           : `➕ *Recargo tarjeta (10%):* +$${(discountedSubtotalUSD * surchargeRate).toFixed(2)} USD\n`) +
+        (shippingArs > 0 ? `🚚 *Envío:* ${formatCurrency(shippingArs)}\n` : '') +
         `✅ *TOTAL A COBRAR:* $${totalUSD.toFixed(2)} USD (${formatCurrency(totalARS)})\n` +
         `💳 *3 cuotas de:* ${formatCurrency(totalARS / 3)}\n\n` +
         `👤 *Datos del comprador:*\n` +
@@ -445,7 +453,11 @@ export default function CheckoutPage() {
                       </div>
                       <div className="text-left">
                         <p className="text-sm font-black text-gray-900">Envío a domicilio</p>
-                        <p className="text-xs text-gray-500 font-bold">100% Gratis</p>
+                        <p className="text-xs text-gray-500 font-bold">
+                          {storeConfig.shipping.cost > 0
+                            ? formatCurrency(storeConfig.shipping.cost)
+                            : storeConfig.shipping.note}
+                        </p>
                       </div>
                       {checkout.fulfillment === 'shipping' && (
                         <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-gray-900 flex items-center justify-center">
@@ -732,6 +744,12 @@ export default function CheckoutPage() {
                           <span className="text-gray-700 font-bold">+${(discountedSubtotalUSD * surchargeRate).toFixed(2)} USD</span>
                         </div>
                       )}
+                      {shippingArs > 0 && (
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-500 font-bold">Envío</span>
+                          <span className="text-gray-700 font-bold">+{formatCurrency(shippingArs)}</span>
+                        </div>
+                      )}
                       <div className="flex justify-between text-sm pt-2 border-t border-gray-200">
                         <span className="text-gray-900 font-black">Total con tarjeta</span>
                         <div className="text-right">
@@ -886,7 +904,13 @@ export default function CheckoutPage() {
                 )}
                 <div className="flex justify-between text-sm">
                   <span className="text-gray-500 font-bold">Envío</span>
-                  <span className="text-gray-500 font-bold">Gratis</span>
+                  <span className="text-gray-500 font-bold">
+                    {checkout.fulfillment !== 'shipping'
+                      ? 'Retiro en persona'
+                      : shippingArs > 0
+                        ? formatCurrency(shippingArs)
+                        : storeConfig.shipping.note}
+                  </span>
                 </div>
                 <div className="flex justify-between text-base pt-2 border-t border-gray-200">
                   <span className="text-gray-900 font-black uppercase">Total</span>

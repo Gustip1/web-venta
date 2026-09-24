@@ -1,18 +1,15 @@
 "use client";
 import { useInstallmentsPromo } from '@/components/InstallmentsPromoProvider';
+import { useStoreConfig } from '@/components/StoreConfigProvider';
 import { DolarWidget } from '@/components/DolarWidget';
-
-const BASE_ITEMS = [
-  '✓ Productos 100% originales',
-  '📦 Envíos a todo el país',
-  '✨ Productos únicos y exclusivos',
-];
 
 const NORMAL_INSTALLMENT = '💳 3 cuotas sin interés (10% de recargo)';
 const PROMO_INSTALLMENT = '🔥 PROMO: 3 cuotas sin interés SIN recargo';
 
 export function BannerTicker() {
   const { active, enabled, comingSoon, soonLabel } = useInstallmentsPromo();
+  // Los mensajes se editan en /admin/ajustes → Cinta de arriba.
+  const { bannerMessages } = useStoreConfig();
 
   // Apagadas desde /admin/ajustes: la cinta ni las menciona.
   const installmentItem = enabled
@@ -23,11 +20,12 @@ export function BannerTicker() {
       ? `💳 ${soonLabel}`
       : null;
 
-  const items = installmentItem ? [installmentItem, ...BASE_ITEMS] : BASE_ITEMS;
+  const items = installmentItem ? [installmentItem, ...bannerMessages] : bannerMessages;
 
   return (
     <div className="w-full bg-gray-900 text-white border-b border-gray-700 overflow-hidden">
       <div className="flex items-center justify-between px-2 md:px-4 max-w-[1600px] mx-auto">
+        {/* Si el admin borró todos los mensajes queda sólo el dólar, sin cinta vacía. */}
         <div className="relative overflow-hidden flex-1 min-w-0" aria-label="Ofertas y mensajes importantes" role="region">
           <div className="animate-marquee motion-reduce:animate-none whitespace-nowrap py-1.5 md:py-2 will-change-transform">
             {[...items, ...items].map((item, idx) =>

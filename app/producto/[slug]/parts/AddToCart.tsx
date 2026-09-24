@@ -8,6 +8,7 @@ import { trackEvent } from '@/lib/analytics/track';
 
 import { useStoreConfig } from '@/components/StoreConfigProvider';
 import { whatsappUrl } from '@/lib/storeConfig';
+import { formatCurrency } from '@/lib/utils';
 
 export function AddToCart({ product, variants }: { product: Product; variants: ProductVariant[] }) {
   const config = useStoreConfig();
@@ -171,7 +172,9 @@ export function AddToCart({ product, variants }: { product: Product; variants: P
           <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
-          Envío gratis en compras mayores a $50
+          {config.shipping.cost > 0
+            ? `Envío a todo el país por ${formatCurrency(config.shipping.cost)}`
+            : `Envíos a todo el país · ${config.shipping.note}`}
         </p>
         <p className="flex items-center gap-2 font-bold">
           <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

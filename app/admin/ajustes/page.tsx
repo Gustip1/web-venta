@@ -28,15 +28,16 @@ import {
   DEFAULT_ABOUT_CONTENT,
   mergeAboutContent,
 } from '@/lib/aboutContent';
-import { Store, Palette, Phone, CreditCard, Search, Megaphone, Check, Loader2, Upload, BookOpen } from 'lucide-react';
+import { Store, Palette, Phone, CreditCard, Search, Megaphone, Check, Loader2, Upload, BookOpen, Truck } from 'lucide-react';
 
-type Tab = 'identidad' | 'colores' | 'contacto' | 'pagos' | 'seo' | 'aviso' | 'nosotros';
+type Tab = 'identidad' | 'colores' | 'contacto' | 'pagos' | 'envio' | 'seo' | 'aviso' | 'nosotros';
 
 const TABS: { id: Tab; label: string; icon: typeof Store }[] = [
   { id: 'identidad', label: 'Identidad', icon: Store },
   { id: 'colores', label: 'Colores', icon: Palette },
   { id: 'contacto', label: 'Contacto y redes', icon: Phone },
   { id: 'pagos', label: 'Cobros', icon: CreditCard },
+  { id: 'envio', label: 'Envío y cinta', icon: Truck },
   { id: 'seo', label: 'SEO y pixel', icon: Search },
   { id: 'aviso', label: 'Aviso emergente', icon: Megaphone },
   { id: 'nosotros', label: 'Nosotros', icon: BookOpen },
@@ -61,6 +62,9 @@ export default function AdminSettingsPage() {
     DEFAULT_INSTALLMENTS_PROMO_CONTENT
   );
   const [about, setAbout] = useState<AboutContent>(DEFAULT_ABOUT_CONTENT);
+  // El texto crudo de la cinta: recién al guardar se parte en líneas. Si se
+  // filtrara en cada tecla, apretar Enter no haría nada.
+  const [bannerText, setBannerText] = useState(DEFAULT_STORE_CONFIG.bannerMessages.join('\n'));
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -82,7 +86,11 @@ export default function AdminSettingsPage() {
         ]);
 
       for (const row of data ?? []) {
-        if (row.key === STORE_CONFIG_KEY) setConfig(mergeStoreConfig(row.value));
+        if (row.key === STORE_CONFIG_KEY) {
+          const merged = mergeStoreConfig(row.value);
+          setConfig(merged);
+          setBannerText(merged.bannerMessages.join('\n'));
+        }
         if (row.key === ACCOUNT_NOTICE_SETTING_KEY) setNotice(mergeAccountNotice(row.value));
         if (row.key === ABOUT_CONTENT_KEY) setAbout(mergeAboutContent(row.value));
         if (row.key === 'installments_promo') {
@@ -115,7 +123,12 @@ export default function AdminSettingsPage() {
     setSaving(false);
   }, []);
 
-  const saveConfig = () => save(STORE_CONFIG_KEY, config, '✓ Guardado. Recargá la tienda para verlo.');
+  const saveConfig = () => {
+    const bannerMessages = bannerText.split('\n').map((l) => l.trim()).filter(Boolean);
+    const next = { ...config, bannerMessages };
+    setConfig(next);
+    return save(STORE_CONFIG_KEY, next, '✓ Guardado. Recargá la tienda para verlo.');
+  };
   const saveNotice = () => save(ACCOUNT_NOTICE_SETTING_KEY, notice, '✓ Aviso guardado.');
   const saveAbout = () => save(ABOUT_CONTENT_KEY, about, '✓ Página "Nosotros" guardada.');
   const saveInstallments = () =>
@@ -298,7 +311,7 @@ export default function AdminSettingsPage() {
                   className="rounded-lg px-3 py-2 text-xs font-bold"
                   style={{ background: config.colors.primaryLight, color: config.colors.primary }}
                 >
-                  Envío gratis
+                  Envíos
                 </span>
                 <span className="h-8 w-8 rounded-full" style={{ background: config.colors.accent }} />
               </div>
@@ -526,6 +539,63 @@ export default function AdminSettingsPage() {
 
               <SaveButton onClick={saveInstallments} saving={saving} />
             </div>
+          </div>
+        )}
+
+        {/* ── ENVÍO Y CINTA ── */}
+        {tab === 'envio' && (
+          <div className="max-w-xl space-y-5">
+            <div>
+              <h2 className="text-base font-bold text-gray-900">Costo del envío</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Se cobra cuando el cliente elige envío a domicilio y se suma al total del pedido. En
+                moneda local, no en dólares.
+              </p>
+            </div>
+
+            <Field label="Precio del envío" hint="Poné 0 si todavía no tenés un precio fijo.">
+              <input
+                type="number"
+                min={0}
+                step="1"
+                className={inputCls}
+                value={config.shipping.cost}
+                onChange={(e) =>
+                  set('shipping', { ...config.shipping, cost: Number(e.target.value) || 0 })
+                }
+              />
+            </Field>
+
+            <Field
+              label="Qué decir cuando el precio es 0"
+              hint="Se muestra en el checkout y en la ficha del producto en lugar del monto."
+            >
+              <input
+                className={inputCls}
+                placeholder="A coordinar"
+                value={config.shipping.note}
+                onChange={(e) => set('shipping', { ...config.shipping, note: e.target.value })}
+              />
+            </Field>
+
+            <div className="border-t border-gray-200 pt-5">
+              <h2 className="text-base font-bold text-gray-900">Cinta de arriba</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Los mensajes que van pasando en la barra negra, arriba de todo. Uno por línea. El aviso
+                de cuotas se agrega solo cuando están activas (se configura en Cobros).
+              </p>
+            </div>
+
+            <Field label="Mensajes" hint="Podés usar emojis. Si borrás todos, la cinta queda sólo con el dólar.">
+              <textarea
+                className={inputCls}
+                rows={5}
+                value={bannerText}
+                onChange={(e) => setBannerText(e.target.value)}
+              />
+            </Field>
+
+            <SaveButton onClick={saveConfig} saving={saving} />
           </div>
         )}
 

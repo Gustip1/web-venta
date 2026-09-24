@@ -50,6 +50,18 @@ export interface StoreConfig {
     /** Wallet para cobros en cripto (opcional). */
     cryptoWallet: string;
   };
+  shipping: {
+    /**
+     * Cuánto cobra el envío a domicilio, en moneda local (no en dólares:
+     * el envío se cotiza en pesos, no sigue al precio de los productos).
+     * 0 = no se cobra un monto fijo y se muestra `note` en su lugar.
+     */
+    cost: number;
+    /** Qué se muestra cuando no hay monto fijo. Ej: "A coordinar por WhatsApp". */
+    note: string;
+  };
+  /** Los mensajes que van pasando en la cinta negra de arriba de todo. */
+  bannerMessages: string[];
   seo: {
     title: string;
     description: string;
@@ -74,6 +86,12 @@ export const DEFAULT_STORE_CONFIG: StoreConfig = {
   contact: { whatsapp: '', email: '', city: '', address: '' },
   social: { instagram: '', tiktok: '', facebook: '' },
   payment: { aliasArs: '', aliasUsd: '', holder: '', cryptoWallet: '' },
+  shipping: { cost: 0, note: 'A coordinar' },
+  bannerMessages: [
+    '✓ Productos 100% originales',
+    '📦 Envíos a todo el país',
+    '✨ Productos únicos y exclusivos',
+  ],
   seo: { title: '', description: '', siteUrl: '', metaPixelId: '' },
 };
 
@@ -87,6 +105,11 @@ export function mergeStoreConfig(value: unknown): StoreConfig {
     contact: { ...DEFAULT_STORE_CONFIG.contact, ...(v.contact ?? {}) },
     social: { ...DEFAULT_STORE_CONFIG.social, ...(v.social ?? {}) },
     payment: { ...DEFAULT_STORE_CONFIG.payment, ...(v.payment ?? {}) },
+    shipping: { ...DEFAULT_STORE_CONFIG.shipping, ...(v.shipping ?? {}) },
+    bannerMessages:
+      Array.isArray(v.bannerMessages) && v.bannerMessages.length > 0
+        ? v.bannerMessages
+        : DEFAULT_STORE_CONFIG.bannerMessages,
     seo: { ...DEFAULT_STORE_CONFIG.seo, ...(v.seo ?? {}) },
   };
 }

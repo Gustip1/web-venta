@@ -166,6 +166,24 @@ export async function POST(req: NextRequest) {
 
     const subtotal = grossSubtotal - discountAmount;
 
+    // ── Envío ──
+    // El monto y el valor del dólar se leen acá (no se confía en el cliente):
+    // el admin los carga en /admin/ajustes y /admin/precios. La orden guarda
+    // todo en USD, así que el costo en moneda local se convierte.
+    let shippingCost = 0;
+    if (body.fulfillment === 'shipping') {
+      const { data: settingsRows } = await supabase
+        .from('settings')
+        .select('key, value')
+        .in('key', ['store_config', 'usd_ars_rate']);
+
+      const byKey = new Map((settingsRows ?? []).map((r: any) => [r.key, r.value]));
+      const costLocal = Number((byKey.get('store_config') as any)?.shipping?.cost ?? 0);
+      const rate = Number(byKey.get('usd_ars_rate') ?? 0);
+
+      if (costLocal > 0 && rate > 0) shippingCost = Number((costLocal / rate).toFixed(2));
+    }
+
     // ── Create order ──
     const orderPayload: Record<string, any> = {
       status: 'draft',
@@ -178,7 +196,7 @@ export async function POST(req: NextRequest) {
       subtotal,
       discount_code: appliedCouponCode,
       discount_amount: discountAmount,
-      shipping_cost: 0,
+      shipping_cost: shippingCost,
       payment_method: body.paymentMethod,
       payment_status: 'pending',
     };
