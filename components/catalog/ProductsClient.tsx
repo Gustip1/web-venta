@@ -60,12 +60,9 @@ const categoryConfig = {
   }
 };
 
-const subcategoryLabels: Record<string, string> = {
-  remeras: 'REMERAS',
-  hoodies: 'HOODIES / ABRIGOS',
-  pantalones: 'PANTALONES',
-  accesorios: 'ACCESORIOS',
-};
+const subcategoryLabels: Record<string, string> = Object.fromEntries(
+  STREETWEAR_SUBCATEGORIES.map((s) => [s.value, s.label.toUpperCase()])
+);
 
 export function ProductsClient({ category, subcategory, brand }: { category?: 'sneakers' | 'streetwear'; subcategory?: StreetWearSubcategory; brand?: string }) {
   const supabase = useRef(createBrowserClient());

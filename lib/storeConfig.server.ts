@@ -1,6 +1,12 @@
 import 'server-only';
 import { createClient } from '@supabase/supabase-js';
 import { STORE_CONFIG_KEY, mergeStoreConfig, DEFAULT_STORE_CONFIG, StoreConfig } from '@/lib/storeConfig';
+import {
+  ABOUT_CONTENT_KEY,
+  AboutContent,
+  DEFAULT_ABOUT_CONTENT,
+  mergeAboutContent,
+} from '@/lib/aboutContent';
 
 /**
  * Lee la configuración de la tienda en el servidor, para que el layout pinte
@@ -23,5 +29,24 @@ export async function getStoreConfig(): Promise<StoreConfig> {
     return mergeStoreConfig(data?.value);
   } catch {
     return DEFAULT_STORE_CONFIG;
+  }
+}
+
+/** Ídem para los textos de /nosotros, editables desde /admin/ajustes. */
+export async function getAboutContent(): Promise<AboutContent> {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!url || !key) return DEFAULT_ABOUT_CONTENT;
+
+  try {
+    const supabase = createClient(url, key);
+    const { data } = await supabase
+      .from('settings')
+      .select('value')
+      .eq('key', ABOUT_CONTENT_KEY)
+      .maybeSingle();
+    return mergeAboutContent(data?.value);
+  } catch {
+    return DEFAULT_ABOUT_CONTENT;
   }
 }

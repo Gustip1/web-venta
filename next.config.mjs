@@ -95,7 +95,7 @@ const nextConfig = {
               "style-src 'self' 'unsafe-inline' https://accounts.google.com https://fonts.googleapis.com",
               "img-src 'self' data: https: blob:",
               "font-src 'self' data: https://fonts.gstatic.com",
-              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com https://dolarapi.com",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://accounts.google.com",
               "frame-src https://accounts.google.com",
               "object-src 'none'",
               "base-uri 'self'",

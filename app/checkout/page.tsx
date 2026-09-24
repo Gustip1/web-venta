@@ -85,8 +85,16 @@ export default function CheckoutPage() {
   );
   // Recargo en tarjeta: 10% normal, 0% cuando el admin activa la promo en /admin/ajustes.
   const isCardPayment = checkout.paymentMethod === 'installments_3';
-  const { active: promoOn } = useInstallmentsPromo();
+  const { active: promoOn, enabled: cuotasOn, comingSoon: cuotasSoon, soonLabel } = useInstallmentsPromo();
   const surchargeRate = getCardSurchargeRate(promoOn);
+
+  // Si el admin apaga las cuotas mientras alguien está en el checkout con esa
+  // opción elegida, se limpia para que no siga un pago que ya no se ofrece.
+  useEffect(() => {
+    if (!cuotasOn && checkout.paymentMethod === 'installments_3') {
+      checkout.setPaymentMethod(null);
+    }
+  }, [cuotasOn, checkout]);
 
   // ─── Cupón de descuento ───
   const [couponInput, setCouponInput] = useState('');
@@ -549,7 +557,18 @@ export default function CheckoutPage() {
                       description="Transferencia bancaria o pago con criptomonedas"
                     />
 
-                    {/* Option C: 3 Cuotas sin interés */}
+                    {/* Option C: 3 Cuotas sin interés — sólo si están habilitadas en /admin/ajustes */}
+                    {cuotasSoon && (
+                      <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4 flex items-center gap-3">
+                        <CreditCard className="w-5 h-5 text-gray-400" />
+                        <div>
+                          <p className="text-sm font-black text-gray-500">3 cuotas con tarjeta</p>
+                          <p className="text-xs font-bold text-gray-400">{soonLabel}</p>
+                        </div>
+                      </div>
+                    )}
+
+                    {cuotasOn && (
                     <PaymentOption
                       selected={checkout.paymentMethod === 'installments_3'}
                       onClick={() => checkout.setPaymentMethod('installments_3')}
@@ -565,6 +584,7 @@ export default function CheckoutPage() {
                           : '10% de recargo sobre el precio base · Link de pago por WhatsApp'
                       }
                     />
+                    )}
                   </div>
                 </div>
 

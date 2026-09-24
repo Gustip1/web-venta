@@ -9,14 +9,28 @@ import {
   mergeStoreConfig,
 } from '@/lib/storeConfig';
 import {
+  InstallmentsPromoContent,
+  InstallmentsMode,
+  DEFAULT_INSTALLMENTS_PROMO_CONTENT,
+} from '@/lib/homeContent';
+import {
   ACCOUNT_NOTICE_SETTING_KEY,
   AccountNotice,
   DEFAULT_ACCOUNT_NOTICE,
   mergeAccountNotice,
 } from '@/lib/accountNotice';
-import { Store, Palette, Phone, CreditCard, Search, Megaphone, Check, Loader2, Upload } from 'lucide-react';
+import {
+  ABOUT_CONTENT_KEY,
+  AboutContent,
+  AboutIcon,
+  ABOUT_ICONS,
+  ABOUT_ICON_LABELS,
+  DEFAULT_ABOUT_CONTENT,
+  mergeAboutContent,
+} from '@/lib/aboutContent';
+import { Store, Palette, Phone, CreditCard, Search, Megaphone, Check, Loader2, Upload, BookOpen } from 'lucide-react';
 
-type Tab = 'identidad' | 'colores' | 'contacto' | 'pagos' | 'seo' | 'aviso';
+type Tab = 'identidad' | 'colores' | 'contacto' | 'pagos' | 'seo' | 'aviso' | 'nosotros';
 
 const TABS: { id: Tab; label: string; icon: typeof Store }[] = [
   { id: 'identidad', label: 'Identidad', icon: Store },
@@ -25,6 +39,7 @@ const TABS: { id: Tab; label: string; icon: typeof Store }[] = [
   { id: 'pagos', label: 'Cobros', icon: CreditCard },
   { id: 'seo', label: 'SEO y pixel', icon: Search },
   { id: 'aviso', label: 'Aviso emergente', icon: Megaphone },
+  { id: 'nosotros', label: 'Nosotros', icon: BookOpen },
 ];
 
 /** Paletas listas para usar, para quien no quiere elegir colores a mano. */
@@ -42,6 +57,10 @@ export default function AdminSettingsPage() {
   const [config, setConfig] = useState<StoreConfig>(DEFAULT_STORE_CONFIG);
   const [notice, setNotice] = useState<AccountNotice>(DEFAULT_ACCOUNT_NOTICE);
   const [instagramToken, setInstagramToken] = useState('');
+  const [installments, setInstallments] = useState<InstallmentsPromoContent>(
+    DEFAULT_INSTALLMENTS_PROMO_CONTENT
+  );
+  const [about, setAbout] = useState<AboutContent>(DEFAULT_ABOUT_CONTENT);
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -54,11 +73,24 @@ export default function AdminSettingsPage() {
       const { data } = await supabase
         .from('settings')
         .select('key, value')
-        .in('key', [STORE_CONFIG_KEY, ACCOUNT_NOTICE_SETTING_KEY, 'instagram_access_token']);
+        .in('key', [
+          STORE_CONFIG_KEY,
+          ACCOUNT_NOTICE_SETTING_KEY,
+          'instagram_access_token',
+          'installments_promo',
+          ABOUT_CONTENT_KEY,
+        ]);
 
       for (const row of data ?? []) {
         if (row.key === STORE_CONFIG_KEY) setConfig(mergeStoreConfig(row.value));
         if (row.key === ACCOUNT_NOTICE_SETTING_KEY) setNotice(mergeAccountNotice(row.value));
+        if (row.key === ABOUT_CONTENT_KEY) setAbout(mergeAboutContent(row.value));
+        if (row.key === 'installments_promo') {
+          setInstallments({
+            ...DEFAULT_INSTALLMENTS_PROMO_CONTENT,
+            ...(row.value as Partial<InstallmentsPromoContent> | null),
+          });
+        }
         if (row.key === 'instagram_access_token') {
           setInstagramToken((row.value as { token?: string } | null)?.token ?? '');
         }
@@ -85,6 +117,9 @@ export default function AdminSettingsPage() {
 
   const saveConfig = () => save(STORE_CONFIG_KEY, config, '✓ Guardado. Recargá la tienda para verlo.');
   const saveNotice = () => save(ACCOUNT_NOTICE_SETTING_KEY, notice, '✓ Aviso guardado.');
+  const saveAbout = () => save(ABOUT_CONTENT_KEY, about, '✓ Página "Nosotros" guardada.');
+  const saveInstallments = () =>
+    save('installments_promo', installments, '✓ Cuotas actualizadas.');
   const saveInstagram = () =>
     save('instagram_access_token', { token: instagramToken.trim() }, '✓ Token guardado.');
 
@@ -420,6 +455,235 @@ export default function AdminSettingsPage() {
             </Field>
 
             <SaveButton onClick={saveConfig} saving={saving} />
+
+            {/* ── Pago en cuotas ── */}
+            <div className="border-t border-gray-200 pt-6 space-y-4">
+              <div>
+                <h2 className="text-base font-bold text-gray-900">Pago en 3 cuotas</h2>
+                <p className="mt-1 text-sm text-gray-500">
+                  Decidí si ofrecés cuotas con tarjeta. Apagadas, no se nombran en ningún lado: ni en la
+                  cinta de arriba, ni en el catálogo, ni en la ficha del producto, ni en el checkout.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {([
+                  { value: 'on', label: 'Activas', hint: 'Se ofrecen normalmente en toda la tienda.' },
+                  { value: 'soon', label: 'Próximamente', hint: 'Se anuncian, pero todavía no se pueden elegir al pagar.' },
+                  { value: 'off', label: 'Apagadas', hint: 'No se muestran en ninguna parte de la web.' },
+                ] as { value: InstallmentsMode; label: string; hint: string }[]).map((opt) => (
+                  <label
+                    key={opt.value}
+                    className={`flex cursor-pointer gap-3 rounded-xl border p-3 ${
+                      installments.mode === opt.value
+                        ? 'border-gray-900 bg-gray-50'
+                        : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="installments-mode"
+                      className="mt-1 h-4 w-4"
+                      checked={installments.mode === opt.value}
+                      onChange={() => setInstallments((p) => ({ ...p, mode: opt.value }))}
+                    />
+                    <span>
+                      <span className="block text-sm font-bold text-gray-900">{opt.label}</span>
+                      <span className="block text-xs text-gray-500">{opt.hint}</span>
+                    </span>
+                  </label>
+                ))}
+              </div>
+
+              {installments.mode === 'soon' && (
+                <Field label="Texto del cartel" hint="Lo que se lee donde antes iban las cuotas.">
+                  <input
+                    className={inputCls}
+                    placeholder="Cuotas próximamente"
+                    value={installments.soonLabel}
+                    onChange={(e) => setInstallments((p) => ({ ...p, soonLabel: e.target.value }))}
+                  />
+                </Field>
+              )}
+
+              {installments.mode === 'on' && (
+                <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-gray-200 p-3 hover:bg-gray-50">
+                  <input
+                    type="checkbox"
+                    className="mt-1 h-4 w-4"
+                    checked={installments.active}
+                    onChange={(e) => setInstallments((p) => ({ ...p, active: e.target.checked }))}
+                  />
+                  <span>
+                    <span className="block text-sm font-bold text-gray-900">Promo sin recargo</span>
+                    <span className="block text-xs text-gray-500">
+                      Las 3 cuotas salen lo mismo que en efectivo (sin el 10% de recargo) y se muestra el
+                      cartel de promo en toda la tienda.
+                    </span>
+                  </span>
+                </label>
+              )}
+
+              <SaveButton onClick={saveInstallments} saving={saving} />
+            </div>
+          </div>
+        )}
+
+        {/* ── NOSOTROS ── */}
+        {tab === 'nosotros' && (
+          <div className="max-w-xl space-y-5">
+            <p className="text-sm text-gray-500">
+              Los textos de la página <strong>/nosotros</strong>: tu historia, cómo trabajan y los números
+              que quieras destacar.
+            </p>
+
+            <Field label="Título grande" hint="Se muestra en dos líneas, arriba de todo.">
+              <input
+                className={inputCls}
+                value={about.heroTitle}
+                onChange={(e) => setAbout((p) => ({ ...p, heroTitle: e.target.value }))}
+              />
+            </Field>
+            <Field label="Segunda línea del título" hint="Se ve en gris claro, debajo de la anterior.">
+              <input
+                className={inputCls}
+                value={about.heroTitleHighlight}
+                onChange={(e) => setAbout((p) => ({ ...p, heroTitleHighlight: e.target.value }))}
+              />
+            </Field>
+
+            <div className="border-t border-gray-200 pt-5">
+              <h2 className="text-base font-bold text-gray-900">Cómo trabajan</h2>
+            </div>
+
+            <Field label="Título de la sección">
+              <input
+                className={inputCls}
+                value={about.valuesTitle}
+                onChange={(e) => setAbout((p) => ({ ...p, valuesTitle: e.target.value }))}
+              />
+            </Field>
+            <Field label="Bajada">
+              <input
+                className={inputCls}
+                value={about.valuesSubtitle}
+                onChange={(e) => setAbout((p) => ({ ...p, valuesSubtitle: e.target.value }))}
+              />
+            </Field>
+
+            {about.values.map((v, i) => (
+              <div key={i} className="rounded-xl border border-gray-200 p-3 space-y-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-black uppercase tracking-wide text-gray-400">
+                    Tarjeta {i + 1}
+                  </span>
+                  <select
+                    className="ml-auto rounded-md border border-gray-300 px-2 py-1 text-xs text-gray-900"
+                    value={v.icon}
+                    onChange={(e) =>
+                      setAbout((p) => ({
+                        ...p,
+                        values: p.values.map((x, j) =>
+                          j === i ? { ...x, icon: e.target.value as AboutIcon } : x
+                        ),
+                      }))
+                    }
+                  >
+                    {ABOUT_ICONS.map((icon) => (
+                      <option key={icon} value={icon}>
+                        {ABOUT_ICON_LABELS[icon]}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <input
+                  className={inputCls}
+                  placeholder="Título"
+                  value={v.title}
+                  onChange={(e) =>
+                    setAbout((p) => ({
+                      ...p,
+                      values: p.values.map((x, j) => (j === i ? { ...x, title: e.target.value } : x)),
+                    }))
+                  }
+                />
+                <textarea
+                  className={inputCls}
+                  rows={2}
+                  placeholder="Descripción"
+                  value={v.desc}
+                  onChange={(e) =>
+                    setAbout((p) => ({
+                      ...p,
+                      values: p.values.map((x, j) => (j === i ? { ...x, desc: e.target.value } : x)),
+                    }))
+                  }
+                />
+              </div>
+            ))}
+
+            <div className="border-t border-gray-200 pt-5">
+              <h2 className="text-base font-bold text-gray-900">Su historia</h2>
+            </div>
+
+            <Field label="Antetítulo" hint="El texto chico en mayúsculas, arriba del título.">
+              <input
+                className={inputCls}
+                value={about.storyEyebrow}
+                onChange={(e) => setAbout((p) => ({ ...p, storyEyebrow: e.target.value }))}
+              />
+            </Field>
+            <Field label="Título" hint='Por ejemplo, "Por qué arrancamos".'>
+              <input
+                className={inputCls}
+                value={about.storyTitle}
+                onChange={(e) => setAbout((p) => ({ ...p, storyTitle: e.target.value }))}
+              />
+            </Field>
+            <Field label="La historia" hint="Un párrafo por línea. Dejá una línea vacía entre uno y otro si querés.">
+              <textarea
+                className={inputCls}
+                rows={6}
+                value={about.storyText}
+                onChange={(e) => setAbout((p) => ({ ...p, storyText: e.target.value }))}
+              />
+            </Field>
+            <Field label="Lista con tildes" hint="Un ítem por línea.">
+              <textarea
+                className={inputCls}
+                rows={3}
+                value={about.storyBullets}
+                onChange={(e) => setAbout((p) => ({ ...p, storyBullets: e.target.value }))}
+              />
+            </Field>
+
+            <div className="border-t border-gray-200 pt-5">
+              <h2 className="text-base font-bold text-gray-900">Los cuatro números</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                Los recuadros del costado de la historia.
+              </p>
+            </div>
+
+            {about.stats.map((st, i) => (
+              <div key={i} className="grid grid-cols-3 gap-2">
+                {(['value', 'label', 'hint'] as const).map((campo) => (
+                  <input
+                    key={campo}
+                    className={inputCls}
+                    placeholder={campo === 'value' ? 'Número' : campo === 'label' ? 'Palabra' : 'Aclaración'}
+                    value={st[campo]}
+                    onChange={(e) =>
+                      setAbout((p) => ({
+                        ...p,
+                        stats: p.stats.map((x, j) => (j === i ? { ...x, [campo]: e.target.value } : x)),
+                      }))
+                    }
+                  />
+                ))}
+              </div>
+            ))}
+
+            <SaveButton onClick={saveAbout} saving={saving} />
           </div>
         )}
 

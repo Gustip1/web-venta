@@ -12,8 +12,18 @@ const NORMAL_INSTALLMENT = '💳 3 cuotas sin interés (10% de recargo)';
 const PROMO_INSTALLMENT = '🔥 PROMO: 3 cuotas sin interés SIN recargo';
 
 export function BannerTicker() {
-  const { active } = useInstallmentsPromo();
-  const items = [active ? PROMO_INSTALLMENT : NORMAL_INSTALLMENT, ...BASE_ITEMS];
+  const { active, enabled, comingSoon, soonLabel } = useInstallmentsPromo();
+
+  // Apagadas desde /admin/ajustes: la cinta ni las menciona.
+  const installmentItem = enabled
+    ? active
+      ? PROMO_INSTALLMENT
+      : NORMAL_INSTALLMENT
+    : comingSoon
+      ? `💳 ${soonLabel}`
+      : null;
+
+  const items = installmentItem ? [installmentItem, ...BASE_ITEMS] : BASE_ITEMS;
 
   return (
     <div className="w-full bg-gray-900 text-white border-b border-gray-700 overflow-hidden">

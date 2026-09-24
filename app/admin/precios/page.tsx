@@ -6,7 +6,7 @@ import { revalidateHome } from '@/lib/admin/revalidateHome';
 export default function BulkPricingPage() {
   const supabase = createBrowserClient();
 
-  // ── Tipo de cambio: convierte los precios en USD a moneda local en toda la tienda ──
+  // ── Valor del dólar: convierte los precios en USD a moneda local en toda la tienda ──
   const [rate, setRate] = useState<number>(0);
   const [rateLoading, setRateLoading] = useState(true);
   const [savingRate, setSavingRate] = useState(false);
@@ -32,7 +32,7 @@ export default function BulkPricingPage() {
     const { error } = await supabase
       .from('settings')
       .upsert({ key: 'usd_ars_rate', value: rate }, { onConflict: 'key' });
-    setRateMessage(error ? `No se pudo guardar: ${error.message}` : '✓ Tipo de cambio actualizado');
+    setRateMessage(error ? `No se pudo guardar: ${error.message}` : '✓ Valor del dólar actualizado');
     if (!error) await revalidateHome();
     setSavingRate(false);
   };
@@ -63,16 +63,17 @@ export default function BulkPricingPage() {
     <div className="space-y-6">
       {/* ── Tipo de cambio ── */}
       <div className="rounded-lg bg-white p-6 shadow-sm">
-        <h1 className="text-xl font-semibold text-gray-900">Tipo de cambio</h1>
+        <h1 className="text-xl font-semibold text-gray-900">Valor del dólar</h1>
         <p className="mt-1 max-w-lg text-sm text-gray-500">
-          Cuánto vale 1 USD en tu moneda. Los productos se cargan en dólares y la tienda muestra el
-          precio convertido con este valor.
+          Vos decidís a cuánto tomás el dólar. Los productos se cargan en dólares y toda la tienda
+          muestra el precio convertido con este valor: el catálogo, el carrito, el checkout y la
+          cinta de arriba. No se consulta ninguna cotización automática.
         </p>
 
         <div className="mt-4 flex flex-wrap items-end gap-3">
           <div>
             <label htmlFor="usd_rate" className="block text-sm font-medium text-gray-700">
-              Valor de 1 USD
+              Cuánto vale 1 dólar
             </label>
             <input
               id="usd_rate"

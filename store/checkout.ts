@@ -32,7 +32,7 @@ export interface CheckoutState {
     notes: string;
   };
   setFulfillment: (f: Fulfillment) => void;
-  setPaymentMethod: (m: PaymentMethod) => void;
+  setPaymentMethod: (m: PaymentMethod | null) => void;
   updateContact: (p: Partial<CheckoutState['contact']>) => void;
   updateAddress: (p: Partial<CheckoutState['address']>) => void;
   setOrderId: (id: string) => void;

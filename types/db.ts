@@ -1,10 +1,28 @@
 export type ProductCategory = 'sneakers' | 'streetwear';
 
-export type StreetWearSubcategory = 'remeras' | 'hoodies' | 'pantalones' | 'accesorios';
+export type StreetWearSubcategory =
+  | 'remeras'
+  | 'longsleeves'
+  | 'hoodies'
+  | 'puffers'
+  | 'conjuntos'
+  | 'pantalones'
+  | 'accesorios';
 
+/**
+ * Las subcategorías de streetwear, en el orden en que se muestran.
+ *
+ * Única fuente de verdad: el formulario de productos, los filtros del catálogo
+ * y las categorías de la portada la leen de acá. Para agregar una nueva,
+ * sumala a la lista y al tipo de arriba; no hace falta tocar la base de datos,
+ * `products.subcategory` es texto libre.
+ */
 export const STREETWEAR_SUBCATEGORIES: { value: StreetWearSubcategory; label: string; icon: string }[] = [
   { value: 'remeras', label: 'Remeras', icon: '👕' },
-  { value: 'hoodies', label: 'Hoodies / Abrigos', icon: '🧥' },
+  { value: 'longsleeves', label: 'Longsleeves', icon: '👕' },
+  { value: 'hoodies', label: 'Hoodies / Zip hoodies', icon: '🧥' },
+  { value: 'puffers', label: 'Puffers', icon: '🧥' },
+  { value: 'conjuntos', label: 'Conjuntos', icon: '🩱' },
   { value: 'pantalones', label: 'Pantalones', icon: '👖' },
   { value: 'accesorios', label: 'Accesorios', icon: '🧢' },
 ];

@@ -67,8 +67,15 @@ function CategoryTile({
   );
 }
 
-export function CategoryShowcase({ images }: { images: Record<string, string> }) {
-  const bySub = Object.fromEntries(CATEGORY_TILES.map((c) => [c.sub, c])) as Record<Tile['sub'], Tile>;
+export function CategoryShowcase({
+  images,
+  tiles = CATEGORY_TILES,
+}: {
+  images: Record<string, string>;
+  tiles?: Tile[];
+}) {
+  // El admin puede apagarlas todas desde /admin/portada: sin categorías no hay sección.
+  if (tiles.length === 0) return null;
 
   return (
     <section className="bg-white pt-8 pb-12 md:pt-10 md:pb-16" aria-labelledby="categories-title">
@@ -83,23 +90,18 @@ export function CategoryShowcase({ images }: { images: Record<string, string> })
           </h2>
         </div>
 
-        {/* ── Mobile: bento asimétrico — Sneakers y Pantalones llevan el tile
-              grande de cada fila; alturas fijas por fila para que nada se
-              desalinee, todo a la vista sin deslizar ── */}
-        <div className="sm:hidden space-y-3">
-          <div className="flex gap-3 h-44">
-            <CategoryTile c={bySub.sneakers} images={images} className="flex-[3]" imgSizes="60vw" />
-            <CategoryTile c={bySub.remeras} images={images} className="flex-[2]" imgSizes="40vw" />
-          </div>
-          <div className="flex gap-3 h-44">
-            <CategoryTile c={bySub.hoodies} images={images} className="flex-[2]" imgSizes="40vw" />
-            <CategoryTile c={bySub.pantalones} images={images} className="flex-[3]" imgSizes="60vw" />
-          </div>
+        {/* ── Mobile: de a dos por fila. Antes era un bento con las cuatro
+              categorías fijas por nombre; ahora la lista la arma el admin y
+              puede tener cualquier cantidad. ── */}
+        <div className="grid grid-cols-2 gap-3 sm:hidden">
+          {tiles.map((c) => (
+            <CategoryTile key={c.sub} c={c} images={images} className="h-44" imgSizes="50vw" />
+          ))}
         </div>
 
-        {/* ── Desktop / tablet: las 4 en fila ── */}
-        <div className="hidden sm:grid grid-cols-4 gap-4 md:gap-6">
-          {CATEGORY_TILES.map((c) => (
+        {/* ── Desktop / tablet: hasta cuatro por fila ── */}
+        <div className="hidden sm:grid grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+          {tiles.map((c) => (
             <CategoryTile key={c.sub} c={c} images={images} className="aspect-[3/4]" imgSizes="25vw" />
           ))}
         </div>

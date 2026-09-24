@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 import { Product } from '@/types/db';
 import { HeroSection } from '@/components/landing/HeroSection';
 import { CategoryShowcase } from '@/components/landing/CategoryShowcase';
-import { CATEGORY_TILES, CategoryTileConfig } from '@/lib/categories';
+import { CategoryTile, CategoryTileConfig, resolveVisibleTiles } from '@/lib/categories';
 import { NewArrivalsCarousel } from '@/components/landing/NewArrivalsCarousel';
 import { HomepageBrands } from '@/components/landing/HomepageBrands';
 import { Reviews, Review } from '@/components/landing/Reviews';
@@ -38,6 +38,7 @@ interface HomeContent {
   howToBuy: HowToBuyContent;
   banner: PromoBannerContent;
   categoryImages: Record<string, string>;
+  categoryTiles: CategoryTile[];
   brandEntries: HomeBrandEntry[];
   reviews: Review[];
 }
@@ -57,7 +58,8 @@ function supabaseAnon() {
  */
 async function resolveCategoryImages(
   supabase: ReturnType<typeof supabaseAnon>,
-  configuredCats: CategoryTileConfig[] | undefined
+  configuredCats: CategoryTileConfig[] | undefined,
+  tiles: CategoryTile[]
 ): Promise<Record<string, string>> {
   const configured: Record<string, string> = {};
   if (Array.isArray(configuredCats)) {
@@ -66,7 +68,7 @@ async function resolveCategoryImages(
     });
   }
 
-  const missing = CATEGORY_TILES.filter((c) => !configured[c.sub]);
+  const missing = tiles.filter((c) => !configured[c.sub]);
   if (missing.length === 0) return configured;
 
   const fallbacks = await Promise.all(
@@ -154,16 +156,16 @@ async function getHomeContent(): Promise<HomeContent> {
 
   const rawReviews = byKey.get('homepage_reviews') as Review[] | undefined;
 
-  const categoryImages = await resolveCategoryImages(
-    supabase,
-    byKey.get('homepage_categories') as CategoryTileConfig[] | undefined
-  );
+  const categoryConfig = byKey.get('homepage_categories') as CategoryTileConfig[] | undefined;
+  const categoryTiles = resolveVisibleTiles(categoryConfig);
+  const categoryImages = await resolveCategoryImages(supabase, categoryConfig, categoryTiles);
 
   return {
     hero: { ...DEFAULT_HERO_CONTENT, ...(byKey.get('homepage_hero') as Partial<HeroContent> | undefined) },
     howToBuy: { ...DEFAULT_HOW_TO_BUY_CONTENT, ...(byKey.get('homepage_how_to_buy') as Partial<HowToBuyContent> | undefined) },
     banner: { ...DEFAULT_PROMO_BANNER_CONTENT, ...(byKey.get('homepage_banner') as Partial<PromoBannerContent> | undefined) },
     categoryImages,
+    categoryTiles,
     brandEntries,
     reviews: Array.isArray(rawReviews) ? rawReviews : [],
   };
@@ -214,7 +216,7 @@ export default async function HomePage() {
       <PromoBanner content={content.banner} />
 
       {/* Elegí tu estilo — remeras / hoodies / pantalones */}
-      <CategoryShowcase images={content.categoryImages} />
+      <CategoryShowcase images={content.categoryImages} tiles={content.categoryTiles} />
 
       {/* Nuevos ingresos en carrusel — server-rendered */}
       <NewArrivalsCarousel products={products} curated={curated} />

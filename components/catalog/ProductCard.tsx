@@ -38,7 +38,7 @@ export function ProductCard({ product, size = 'normal' }: ProductCardProps) {
   const primary                 = images[0];
   const secondary               = images[1]; // imagen para el swap en hover (estilo Shopify)
   const { rate: dolarOficial }  = useDolarRate();
-  const { active: promoOn }     = useInstallmentsPromo();
+  const { active: promoOn, enabled: cuotasOn, comingSoon: cuotasSoon, soonLabel } = useInstallmentsPromo();
   // Marcado como próximo ingreso desde /admin/proximos (con fecha estimada opcional)
   const { isComingSoon: comingSoon, eta: comingSoonEta } = useComingSoon(product.id);
 
@@ -237,8 +237,15 @@ export function ProductCard({ product, size = 'normal' }: ProductCardProps) {
             )}
           </div>
 
+          {/* Cuotas anunciadas como próximamente desde /admin/ajustes */}
+          {!isSoldOut && cuotasSoon && (
+            <div className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-1.5 py-0.5 text-[10px] font-black text-gray-500">
+              💳 {soonLabel}
+            </div>
+          )}
+
           {/* Tarjeta 3 cuotas — clickeable, comparte la aclaración con el de arriba */}
-          {!isSoldOut && (
+          {!isSoldOut && cuotasOn && (
             <div>
               <button
                 type="button"

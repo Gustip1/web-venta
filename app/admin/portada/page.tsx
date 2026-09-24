@@ -14,14 +14,13 @@ import {
   DEFAULT_PROMO_BANNER_CONTENT,
 } from '@/lib/homeContent';
 
-const CATS = [
-  { label: 'Remeras',    sub: 'remeras' },
-  { label: 'Hoodies',    sub: 'hoodies' },
-  { label: 'Pantalones', sub: 'pantalones' },
-  { label: 'Sneakers',   sub: 'sneakers' },
-] as const;
+import {
+  AVAILABLE_CATEGORY_TILES,
+  CategoryTileConfig as TileConfig,
+  DEFAULT_VISIBLE_SUBS,
+} from '@/lib/categories';
 
-type TileConfig = { sub: string; label?: string; url?: string };
+const CATS = AVAILABLE_CATEGORY_TILES;
 type HomeBrandEntry = {
   id: string;
   kind: 'brand' | 'sneakers';
@@ -32,6 +31,8 @@ type HomeBrandEntry = {
 
 export default function AdminPortadaPage() {
   const [tiles, setTiles] = useState<Record<string, UploadedImage[]>>({});
+  const [visible, setVisible] = useState<Record<string, boolean>>({});
+  const [labels, setLabels] = useState<Record<string, string>>({});
   const [allBrands, setAllBrands] = useState<Brand[]>([]);
   const [entries, setEntries] = useState<HomeBrandEntry[]>([]);
   const [hero, setHero] = useState<HeroContent>(DEFAULT_HERO_CONTENT);
@@ -56,11 +57,18 @@ export default function AdminPortadaPage() {
       // Imágenes de categorías
       const cfg = (catRes.data?.value as TileConfig[] | null) || [];
       const next: Record<string, UploadedImage[]> = {};
+      const nextVisible: Record<string, boolean> = {};
+      const nextLabels: Record<string, string> = {};
       CATS.forEach((c) => {
         const found = Array.isArray(cfg) ? cfg.find((t) => t.sub === c.sub) : undefined;
         next[c.sub] = found?.url ? [{ url: found.url, alt: c.label }] : [];
+        // Config vieja (sin el campo visible): se respeta lo que se mostraba hasta ahora.
+        nextVisible[c.sub] = found?.visible ?? DEFAULT_VISIBLE_SUBS.includes(c.sub);
+        nextLabels[c.sub] = found?.label?.trim() || c.label;
       });
       setTiles(next);
+      setVisible(nextVisible);
+      setLabels(nextLabels);
 
       // Marcas disponibles
       setAllBrands((brandsTable.data || []) as Brand[]);
@@ -123,8 +131,9 @@ export default function AdminPortadaPage() {
 
     const categoriesValue: TileConfig[] = CATS.map((c) => ({
       sub: c.sub,
-      label: c.label,
+      label: labels[c.sub]?.trim() || c.label,
       url: tiles[c.sub]?.[0]?.url || undefined,
+      visible: visible[c.sub] ?? false,
     }));
 
     const results = await Promise.all([
@@ -167,23 +176,46 @@ export default function AdminPortadaPage() {
           {/* ── Imágenes de categorías ── */}
           <section className="space-y-4">
             <div>
-              <h2 className="text-lg font-bold text-gray-900">Imágenes de categorías</h2>
+              <h2 className="text-lg font-bold text-gray-900">Categorías de la home</h2>
               <p className="text-sm text-gray-500">
-                Si no subís ninguna, se usa la última foto del producto más reciente de esa categoría.
+                Tildá las que querés mostrar en “Elegí tu estilo”, cambiales el nombre si hace falta y
+                elegí su foto. Si no subís ninguna, se usa la última foto del producto más reciente de esa
+                categoría.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {CATS.map((c) => (
-                <div key={c.sub} className="bg-white shadow-sm rounded-xl border border-gray-200 p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-base font-bold text-gray-900">{c.label}</h3>
-                    {tiles[c.sub]?.length > 0 && (
-                      <span className="text-xs font-semibold text-emerald-600">Imagen elegida</span>
-                    )}
+              {CATS.map((c) => {
+                const shown = visible[c.sub] ?? false;
+                return (
+                  <div
+                    key={c.sub}
+                    className={`bg-white shadow-sm rounded-xl border p-4 space-y-3 ${
+                      shown ? 'border-gray-200' : 'border-dashed border-gray-300 bg-gray-50'
+                    }`}
+                  >
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={shown}
+                        onChange={(e) => setVisible((prev) => ({ ...prev, [c.sub]: e.target.checked }))}
+                        className="h-4 w-4 rounded border-gray-300"
+                      />
+                      <span className="text-sm font-bold text-gray-900">Mostrar en la home</span>
+                    </label>
+
+                    <input
+                      value={labels[c.sub] ?? c.label}
+                      onChange={(e) => setLabels((prev) => ({ ...prev, [c.sub]: e.target.value }))}
+                      placeholder={c.label}
+                      className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm font-bold text-gray-900"
+                    />
+
+                    <div className={shown ? '' : 'opacity-50'}>
+                      <ImageUploader value={tiles[c.sub] || []} onChange={(imgs) => setSlot(c.sub, imgs)} />
+                    </div>
                   </div>
-                  <ImageUploader value={tiles[c.sub] || []} onChange={(imgs) => setSlot(c.sub, imgs)} />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
 

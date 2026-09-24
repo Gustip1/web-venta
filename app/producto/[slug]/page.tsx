@@ -20,7 +20,7 @@ export default function ProductDetailPage() {
   const params = useParams<{ slug: string }>();
   const supabase = createBrowserClient();
   const { rate: dolarOficial } = useDolarRate();
-  const { active: promoOn } = useInstallmentsPromo();
+  const { active: promoOn, enabled: cuotasOn, comingSoon: cuotasSoon, soonLabel } = useInstallmentsPromo();
   const [product, setProduct] = useState<Product | null>(null);
   const [variants, setVariants] = useState<ProductVariant[]>([]);
   const [offersEnabled, setOffersEnabled] = useState(false);
@@ -223,7 +223,23 @@ export default function ProductDetailPage() {
                     </p>
                   </div>
 
+                  {/* Cuotas en "próximamente": se anuncian sin precio ni opción de pago */}
+                  {cuotasSoon && (
+                    <div className="relative rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-4">
+                      <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center justify-center w-8 h-8 rounded-full shrink-0 bg-gray-100">
+                          <CreditCard className="w-4 h-4 text-gray-400" />
+                        </div>
+                        <p className="text-[11px] md:text-xs font-black uppercase tracking-wide text-gray-500 leading-tight">
+                          Tarjeta
+                        </p>
+                      </div>
+                      <p className="text-lg md:text-xl font-black tracking-tight text-gray-500">{soonLabel}</p>
+                    </div>
+                  )}
+
                   {/* Tarjeta — 3 cuotas */}
+                  {cuotasOn && (
                   <div className={cn(
                     'relative rounded-2xl border p-4',
                     promoOn ? 'border-2 border-red-600 bg-red-50' : 'border-gray-200 bg-white',
@@ -251,6 +267,7 @@ export default function ProductDetailPage() {
                       {promoOn ? 'Sin recargo' : `Total ${formatCurrency(cardPriceArs)}`}
                     </p>
                   </div>
+                  )}
                 </div>
 
                 <p className="text-[11px] text-gray-400 font-medium">

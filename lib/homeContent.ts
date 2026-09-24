@@ -89,13 +89,28 @@ export const DEFAULT_PROMO_BANNER_CONTENT: PromoBannerContent = {
   ctaHref: '',
 };
 
+/**
+ * Qué hace la tienda con el pago en 3 cuotas:
+ *   'on'   → se ofrece normalmente
+ *   'soon' → se anuncia como "próximamente", sin precio ni opción de pago
+ *   'off'  → no se menciona en ningún lado (cinta, catálogo, producto, checkout)
+ */
+export type InstallmentsMode = 'on' | 'soon' | 'off';
+
 export interface InstallmentsPromoContent {
   /** Si está activo, las 3 cuotas no tienen recargo (y se muestra el popup en todo el sitio). */
   active: boolean;
+  mode: InstallmentsMode;
+  /** Texto del cartel mientras está en "próximamente". */
+  soonLabel: string;
 }
 
 export const DEFAULT_INSTALLMENTS_PROMO_CONTENT: InstallmentsPromoContent = {
   active: false,
+  // 'on' para que las tiendas que ya venían ofreciendo cuotas no las pierdan
+  // al actualizar: las filas viejas de settings sólo tienen `active`.
+  mode: 'on',
+  soonLabel: 'Cuotas próximamente',
 };
 
 

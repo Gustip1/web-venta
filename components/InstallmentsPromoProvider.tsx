@@ -5,9 +5,22 @@ import { InstallmentsPromoContent, DEFAULT_INSTALLMENTS_PROMO_CONTENT } from '@/
 
 const InstallmentsPromoContext = createContext<InstallmentsPromoContent>(DEFAULT_INSTALLMENTS_PROMO_CONTENT);
 
-/** true cuando el admin activó "3 cuotas sin interés sin recargo" desde /admin/ajustes. */
+/**
+ * Configuración de cuotas cargada desde /admin/ajustes:
+ *   active    → promo "sin recargo"
+ *   enabled   → se ofrecen cuotas (modo 'on')
+ *   comingSoon→ se anuncian como próximamente (modo 'soon')
+ * En modo 'off' los dos últimos son false y no se muestran en ningún lado.
+ */
 export function useInstallmentsPromo() {
-  return useContext(InstallmentsPromoContext);
+  const promo = useContext(InstallmentsPromoContext);
+  return {
+    ...promo,
+    enabled: promo.mode === 'on',
+    comingSoon: promo.mode === 'soon',
+    // La promo sin recargo sólo tiene sentido con las cuotas ofreciéndose.
+    active: promo.active && promo.mode === 'on',
+  };
 }
 
 // Este valor se lee una vez al montar el layout raíz, que en Next.js App

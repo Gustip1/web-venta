@@ -11,7 +11,8 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { getInstagramPosts } from '@/lib/instagram';
-import { getStoreConfig } from '@/lib/storeConfig.server';
+import { getAboutContent, getStoreConfig } from '@/lib/storeConfig.server';
+import { AboutIcon, toLines } from '@/lib/aboutContent';
 import { whatsappUrl, socialHandle } from '@/lib/storeConfig';
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,24 +31,28 @@ function TikTokIcon({ className }: { className?: string }) {
   );
 }
 
+/** Los íconos que ofrece el panel, en el orden de lib/aboutContent. */
+const ICONS: Record<AboutIcon, typeof Shield> = {
+  escudo: Shield,
+  camion: Truck,
+  estrella: Sparkles,
+  gente: Users,
+};
+
 /**
- * Página "Nosotros" — plantilla. Los datos (nombre, ciudad, redes, WhatsApp)
+ * Página "Nosotros". Los datos (nombre, ciudad, redes, WhatsApp)
  * salen de /admin/ajustes; los textos largos están acá para que cada tienda
  * los reescriba con su propia historia.
  */
 export default async function NosotrosPage() {
   const config = await getStoreConfig();
+  const about = await getAboutContent();
   const feed = await getInstagramPosts(9);
   const wa = whatsappUrl(config, `Hola! Quería hacerles una consulta.`);
   const igHandle = socialHandle(config.social.instagram);
   const ttHandle = socialHandle(config.social.tiktok);
 
-  const valores = [
-    { icon: Shield, title: 'Producto original', desc: 'Cada pieza se revisa antes de salir. Sin réplicas, sin excepciones.' },
-    { icon: Truck, title: 'Envíos a todo el país', desc: 'Coordinamos la entrega con seguimiento hasta tu puerta.' },
-    { icon: Sparkles, title: 'Curaduría propia', desc: 'Elegimos modelo por modelo: sólo entra lo que vale la pena.' },
-    { icon: Users, title: 'Atención de verdad', desc: 'Te contestamos nosotros, no un bot. Antes, durante y después de la compra.' },
-  ];
+  const valores = about.values.map((v) => ({ ...v, icon: ICONS[v.icon] ?? Shield }));
 
   return (
     <div className="bg-white text-gray-900 -mx-2 md:-mx-8 lg:-mx-12 -my-3 md:-my-8 overflow-hidden">
@@ -70,9 +75,9 @@ export default async function NosotrosPage() {
           </div>
 
           <h1 className="animate-hero-enter hero-delay-1 text-[2.5rem] leading-[0.95] md:text-7xl lg:text-8xl font-black tracking-tighter max-w-5xl text-gray-900">
-            Cultura urbana,
+            {about.heroTitle}
             <br />
-            <span className="text-gray-400">producto original.</span>
+            <span className="text-gray-400">{about.heroTitleHighlight}</span>
           </h1>
 
           <p className="animate-hero-enter hero-delay-2 mt-6 md:mt-8 max-w-2xl text-base md:text-xl text-gray-600 font-medium leading-relaxed">
@@ -104,10 +109,10 @@ export default async function NosotrosPage() {
       <section className="border-t border-gray-200 bg-gray-50">
         <div className="max-w-[1200px] mx-auto px-5 md:px-10 py-14 md:py-20">
           <h2 className="text-2xl md:text-4xl font-black tracking-tight text-gray-900">
-            Cómo trabajamos
+            {about.valuesTitle}
           </h2>
           <p className="mt-3 max-w-2xl text-sm md:text-base text-gray-600 font-medium">
-            Cuatro cosas que no negociamos. Editá este bloque para contar las tuyas.
+            {about.valuesSubtitle}
           </p>
 
           <div className="mt-8 md:mt-12 grid gap-4 md:gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -132,24 +137,19 @@ export default async function NosotrosPage() {
         <div className="max-w-[1200px] mx-auto px-5 md:px-10 py-14 md:py-20 grid gap-10 md:gap-16 lg:grid-cols-2">
           <div>
             <p className="text-[10px] md:text-xs font-black uppercase tracking-[0.18em] text-gray-400">
-              Nuestra historia
+              {about.storyEyebrow}
             </p>
             <h2 className="mt-3 text-2xl md:text-4xl font-black tracking-tight text-gray-900">
-              Por qué arrancamos
+              {about.storyTitle}
             </h2>
             <div className="mt-5 space-y-4 text-sm md:text-base text-gray-600 font-medium leading-relaxed">
-              <p>
-                Contá acá cómo empezó la tienda: qué te faltaba en tu ciudad, qué querías hacer distinto y
-                cómo fue el primer pedido. Las historias reales venden más que cualquier eslogan.
-              </p>
-              <p>
-                Sumá un segundo párrafo con dónde están hoy: cuántos clientes, qué marcas trabajan y qué se
-                viene. Este texto se edita en <code className="rounded bg-gray-100 px-1.5 py-0.5 text-xs">app/nosotros/page.tsx</code>.
-              </p>
+              {toLines(about.storyText).map((parrafo) => (
+                <p key={parrafo}>{parrafo}</p>
+              ))}
             </div>
 
             <ul className="mt-6 space-y-2.5">
-              {['Productos verificados uno por uno', 'Precio claro, sin sorpresas', 'Posventa que responde'].map((item) => (
+              {toLines(about.storyBullets).map((item) => (
                 <li key={item} className="flex items-center gap-2.5 text-sm font-bold text-gray-700">
                   <CheckCircle2 className="h-4 w-4 shrink-0 text-gray-900" />
                   {item}
@@ -159,12 +159,7 @@ export default async function NosotrosPage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 md:gap-4 content-start">
-            {[
-              { k: '100%', v: 'Original', sub: 'Sin réplicas' },
-              { k: '24h', v: 'Respuesta', sub: 'Todos los días' },
-              { k: 'País', v: 'Envíos', sub: 'Con seguimiento' },
-              { k: '★', v: 'Clientes', sub: 'Que vuelven' },
-            ].map(({ k, v, sub }) => (
+            {about.stats.map(({ value: k, label: v, hint: sub }) => (
               <div key={v} className="rounded-2xl border border-gray-200 bg-gray-50 p-5 md:p-6">
                 <p className="text-2xl md:text-4xl font-black tracking-tighter text-gray-900">{k}</p>
                 <p className="mt-1 text-sm font-black uppercase tracking-tight text-gray-900">{v}</p>
