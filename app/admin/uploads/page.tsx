@@ -46,8 +46,8 @@ export default function AdminUploadsPage() {
     <div className="space-y-4">
       <h1 className="text-xl font-semibold">Uploads de imágenes</h1>
       <div className="max-w-xl">
-        <label className="block text-sm font-medium text-white">Producto</label>
-        <select className="mt-1 w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white" value={selected} onChange={(e) => setSelected(e.target.value)}>
+        <label className="block text-sm font-medium text-gray-700">Producto</label>
+        <select className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" value={selected} onChange={(e) => setSelected(e.target.value)}>
           <option value="">Seleccionar...</option>
           {products.map((p) => (
             <option key={p.id} value={p.id}>
@@ -62,7 +62,7 @@ export default function AdminUploadsPage() {
           <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {images.map((img, idx) => (
               <div key={img.url} className="rounded border border-neutral-800 p-2 text-sm">
-                <div className="truncate text-white">{img.url}</div>
+                <div className="truncate text-gray-700">{img.url}</div>
                 <div className="mt-2 flex gap-2">
                   <button className="rounded bg-neutral-800 px-3 py-1 text-xs text-white" onClick={() => move(idx, -1)}>
                     ↑

@@ -62,6 +62,11 @@ export interface StoreConfig {
   };
   /** Los mensajes que van pasando en la cinta negra de arriba de todo. */
   bannerMessages: string[];
+  /**
+   * El emoji de cada categoría, por su valor ('sneakers', 'remeras', …).
+   * Lo que no esté acá usa el emoji que trae la categoría por defecto.
+   */
+  categoryIcons: Record<string, string>;
   seo: {
     title: string;
     description: string;
@@ -92,6 +97,7 @@ export const DEFAULT_STORE_CONFIG: StoreConfig = {
     '📦 Envíos a todo el país',
     '✨ Productos únicos y exclusivos',
   ],
+  categoryIcons: {},
   seo: { title: '', description: '', siteUrl: '', metaPixelId: '' },
 };
 
@@ -110,6 +116,7 @@ export function mergeStoreConfig(value: unknown): StoreConfig {
       Array.isArray(v.bannerMessages) && v.bannerMessages.length > 0
         ? v.bannerMessages
         : DEFAULT_STORE_CONFIG.bannerMessages,
+    categoryIcons: { ...DEFAULT_STORE_CONFIG.categoryIcons, ...(v.categoryIcons ?? {}) },
     seo: { ...DEFAULT_STORE_CONFIG.seo, ...(v.seo ?? {}) },
   };
 }

@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 :root {
+  /* La tienda y el panel están diseñados en claro. Sin esto, un celular en modo
+     noche pinta los campos de los formularios con su propio esquema oscuro y el
+     texto que se escribe queda casi ilegible. */
+  color-scheme: light;
+
   --header-height: 90px;
   --header-height-mobile: 76px;
   /* --font-sans / --font-display las define next/font/google en app/layout.tsx */
@@ -29,6 +34,22 @@ html, body {
      scrollear, achicando la pantalla útil todo el tiempo. */
   overflow-x: hidden;
   overflow-y: visible;
+}
+
+/* Los campos de texto siempre en claro, sin depender de lo que decida el
+   navegador. Se dejan afuera los controles que se pintan solos (casillas,
+   radios, color, rango) y los que la pantalla estiliza aparte. */
+input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='range']):not([type='file']),
+select,
+textarea {
+  background-color: #fff;
+  color: var(--color-text);
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-text-secondary);
+  opacity: 1;
 }
 
 /* Prevent zoom on input focus on iOS */

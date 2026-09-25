@@ -9,9 +9,12 @@ import { useUIStore } from '@/store/ui';
 import { useCartStore } from '@/store/cart';
 import { cn } from '@/lib/utils';
 import { BannerTicker } from './BannerTicker';
+import { useStoreConfig } from '@/components/StoreConfigProvider';
+import { categoryIcon } from '@/lib/categories';
 import { STREETWEAR_SUBCATEGORIES, Brand } from '@/types/db';
 
 export function Header() {
+  const storeConfig = useStoreConfig();
   const toggleSidebar = useUIStore((s) => s.toggleSidebar);
   const openCart = useUIStore((s) => s.openCart);
   const cartItems = useCartStore((s) => s.items);
@@ -186,7 +189,7 @@ export function Header() {
                         href={`/productos?streetwear&sub=${sub.value}`}
                         className="flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all"
                       >
-                        <span className="text-lg">{sub.icon}</span>
+                        <span className="text-lg">{categoryIcon(storeConfig.categoryIcons, sub.value, sub.icon)}</span>
                         <span>{sub.label}</span>
                       </Link>
                     ))}

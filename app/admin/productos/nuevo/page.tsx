@@ -1,6 +1,8 @@
 "use client";
 import { useEffect, useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { useStoreConfig } from '@/components/StoreConfigProvider';
+import { categoryIcon } from '@/lib/categories';
 import { ImageUploader, UploadedImage } from '@/components/admin/ImageUploader';
 import { VariantEditor } from '@/components/admin/VariantEditor';
 import { slugify } from '@/lib/utils';
@@ -8,6 +10,7 @@ import { Brand, STREETWEAR_SUBCATEGORIES, StreetWearSubcategory } from '@/types/
 import { revalidateHome } from '@/lib/admin/revalidateHome';
 
 export default function NewProductPage() {
+  const storeConfig = useStoreConfig();
   const supabase = createBrowserClient();
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<'sneakers' | 'streetwear'>('sneakers');
@@ -116,7 +119,7 @@ export default function NewProductPage() {
                 <option value="">— Sin subcategoría —</option>
                 {STREETWEAR_SUBCATEGORIES.map((sub) => (
                   <option key={sub.value} value={sub.value}>
-                    {sub.icon} {sub.label}
+                    {categoryIcon(storeConfig.categoryIcons, sub.value, sub.icon)} {sub.label}
                   </option>
                 ))}
               </select>

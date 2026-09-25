@@ -15,17 +15,28 @@
 
 import { STREETWEAR_SUBCATEGORIES } from '@/types/db';
 
-export type CategoryTile = { label: string; sub: string; href: string };
+export type CategoryTile = { label: string; sub: string; href: string; icon: string };
 
 /** Todas las categorías que el admin puede mostrar en la home. */
 export const AVAILABLE_CATEGORY_TILES: CategoryTile[] = [
-  { label: 'Sneakers', sub: 'sneakers', href: '/productos?sneakers' },
+  { label: 'Sneakers', sub: 'sneakers', href: '/productos?sneakers', icon: '👟' },
   ...STREETWEAR_SUBCATEGORIES.map((s) => ({
     label: s.label,
     sub: s.value,
     href: `/productos?streetwear&sub=${s.value}`,
+    icon: s.icon,
   })),
 ];
+
+/**
+ * El emoji que hay que mostrar para una categoría: el que eligió el dueño en
+ * /admin/ajustes y, si no eligió ninguno, el que trae el código.
+ */
+export function categoryIcon(icons: Record<string, string> | undefined, sub: string, fallback = ''): string {
+  const chosen = icons?.[sub]?.trim();
+  if (chosen) return chosen;
+  return fallback || AVAILABLE_CATEGORY_TILES.find((c) => c.sub === sub)?.icon || '';
+}
 
 /** Lo que se muestra mientras nadie haya elegido nada en /admin/portada. */
 export const DEFAULT_VISIBLE_SUBS = ['sneakers', 'remeras', 'hoodies', 'pantalones'];

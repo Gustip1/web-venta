@@ -4,6 +4,8 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
 import { Brand, Product, STREETWEAR_SUBCATEGORIES, StreetWearSubcategory } from '@/types/db';
+import { useStoreConfig } from '@/components/StoreConfigProvider';
+import { categoryIcon } from '@/lib/categories';
 import { ProductCard } from './ProductCard';
 import { X, SlidersHorizontal, Grid3X3, LayoutGrid } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -65,6 +67,7 @@ const subcategoryLabels: Record<string, string> = Object.fromEntries(
 );
 
 export function ProductsClient({ category, subcategory, brand }: { category?: 'sneakers' | 'streetwear'; subcategory?: StreetWearSubcategory; brand?: string }) {
+  const storeConfig = useStoreConfig();
   const supabase = useRef(createBrowserClient());
   const [q, setQ] = useState('');
   const dq = useDebouncedValue(q, 350);
@@ -262,7 +265,7 @@ export function ProductsClient({ category, subcategory, brand }: { category?: 's
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900"
               )}
             >
-              <span>{sub.icon}</span>
+              <span>{categoryIcon(storeConfig.categoryIcons, sub.value, sub.icon)}</span>
               {sub.label}
             </Link>
           ))}

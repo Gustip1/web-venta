@@ -105,19 +105,19 @@ export default function BulkPricingPage() {
       <h1 className="text-xl font-semibold">Precios (Bulk)</h1>
       <div className="grid max-w-xl grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-white">Modo</label>
-          <select className="mt-1 w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white" value={mode} onChange={(e) => setMode(e.target.value as any)}>
+          <label className="block text-sm font-medium text-gray-700">Modo</label>
+          <select className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" value={mode} onChange={(e) => setMode(e.target.value as any)}>
             <option value="percent">% Porcentaje</option>
             <option value="fixed">$ Fijo</option>
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-white">Valor</label>
-          <input className="mt-1 w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white" type="number" value={value} onChange={(e) => setValue(Number(e.target.value))} />
+          <label className="block text-sm font-medium text-gray-700">Valor</label>
+          <input className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" type="number" value={value} onChange={(e) => setValue(Number(e.target.value))} />
         </div>
         <div>
-          <label className="block text-sm font-medium text-white">Categoría</label>
-          <select className="mt-1 w-full rounded border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm text-white" value={category} onChange={(e) => setCategory(e.target.value)}>
+          <label className="block text-sm font-medium text-gray-700">Categoría</label>
+          <select className="mt-1 w-full rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-900 focus:border-gray-900 focus:outline-none" value={category} onChange={(e) => setCategory(e.target.value)}>
             <option value="">Todas</option>
             <option value="sneakers">Sneakers</option>
             <option value="streetwear">Streetwear</option>
@@ -129,7 +129,7 @@ export default function BulkPricingPage() {
         {message && <span className="text-sm">{message}</span>}
       </div>
       {confirming && (
-        <div className="rounded border border-yellow-700/40 bg-yellow-900/10 p-3 text-sm text-white">
+        <div className="rounded border border-yellow-300 bg-yellow-50 p-3 text-sm text-gray-900">
           <p>¿Confirmás actualizar precios? Esto afectará a los productos seleccionados.</p>
           <div className="mt-2 flex gap-2">
             <button onClick={apply} className="rounded bg-green-600 px-3 py-1 text-white">Confirmar</button>

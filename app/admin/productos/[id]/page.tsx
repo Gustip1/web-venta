@@ -2,6 +2,8 @@
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { useStoreConfig } from '@/components/StoreConfigProvider';
+import { categoryIcon } from '@/lib/categories';
 import { ImageUploader, UploadedImage } from '@/components/admin/ImageUploader';
 import { VariantEditor } from '@/components/admin/VariantEditor';
 import { Save, Trash2, ArrowLeft, Eye, Package } from 'lucide-react';
@@ -11,6 +13,7 @@ import { Brand, STREETWEAR_SUBCATEGORIES, StreetWearSubcategory } from '@/types/
 import { revalidateHome } from '@/lib/admin/revalidateHome';
 
 export default function EditProductPage() {
+  const storeConfig = useStoreConfig();
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
   const supabase = createBrowserClient();
@@ -318,7 +321,7 @@ export default function EditProductPage() {
                           : "border-gray-200 text-gray-600 hover:border-gray-300"
                       )}
                     >
-                      {sub.icon} {sub.label}
+                      {categoryIcon(storeConfig.categoryIcons, sub.value, sub.icon)} {sub.label}
                     </button>
                   ))}
                 </div>

@@ -2,10 +2,13 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import { createBrowserClient } from '@/lib/supabase/client';
+import { useStoreConfig } from '@/components/StoreConfigProvider';
+import { categoryIcon } from '@/lib/categories';
 import { Product, STREETWEAR_SUBCATEGORIES } from '@/types/db';
 import { revalidateHome } from '@/lib/admin/revalidateHome';
 
 export default function AdminProductsPage() {
+  const storeConfig = useStoreConfig();
   const [products, setProducts] = useState<Product[]>([]);
   const [q, setQ] = useState('');
   const [category, setCategory] = useState<string>('');
@@ -110,7 +113,7 @@ export default function AdminProductsPage() {
               <option value="">Todas</option>
               {STREETWEAR_SUBCATEGORIES.map((sub) => (
                 <option key={sub.value} value={sub.value}>
-                  {sub.icon} {sub.label}
+                  {categoryIcon(storeConfig.categoryIcons, sub.value, sub.icon)} {sub.label}
                 </option>
               ))}
             </select>

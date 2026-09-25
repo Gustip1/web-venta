@@ -3,6 +3,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { StoreLogo } from '@/components/layout/StoreLogo';
 import { useStoreConfig } from '@/components/StoreConfigProvider';
+import { categoryIcon } from '@/lib/categories';
 import { socialHandle } from '@/lib/storeConfig';
 import { useEffect, useState } from 'react';
 import { useUIStore } from '@/store/ui';
@@ -224,7 +225,7 @@ export function Sidebar() {
                       onClick={close}
                       className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-gray-600 hover:text-gray-900 hover:bg-gray-50 transition-all"
                     >
-                      <span className="text-lg">{sub.icon}</span>
+                      <span className="text-lg">{categoryIcon(config.categoryIcons, sub.value, sub.icon)}</span>
                       <span>{sub.label}</span>
                     </Link>
                   ))}

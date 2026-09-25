@@ -19,6 +19,7 @@ import {
   DEFAULT_ACCOUNT_NOTICE,
   mergeAccountNotice,
 } from '@/lib/accountNotice';
+import { AVAILABLE_CATEGORY_TILES, categoryIcon } from '@/lib/categories';
 import {
   ABOUT_CONTENT_KEY,
   AboutContent,
@@ -28,9 +29,9 @@ import {
   DEFAULT_ABOUT_CONTENT,
   mergeAboutContent,
 } from '@/lib/aboutContent';
-import { Store, Palette, Phone, CreditCard, Search, Megaphone, Check, Loader2, Upload, BookOpen, Truck } from 'lucide-react';
+import { Store, Palette, Phone, CreditCard, Search, Megaphone, Check, Loader2, Upload, BookOpen, Truck, Smile } from 'lucide-react';
 
-type Tab = 'identidad' | 'colores' | 'contacto' | 'pagos' | 'envio' | 'seo' | 'aviso' | 'nosotros';
+type Tab = 'identidad' | 'colores' | 'contacto' | 'pagos' | 'envio' | 'categorias' | 'seo' | 'aviso' | 'nosotros';
 
 const TABS: { id: Tab; label: string; icon: typeof Store }[] = [
   { id: 'identidad', label: 'Identidad', icon: Store },
@@ -38,6 +39,7 @@ const TABS: { id: Tab; label: string; icon: typeof Store }[] = [
   { id: 'contacto', label: 'Contacto y redes', icon: Phone },
   { id: 'pagos', label: 'Cobros', icon: CreditCard },
   { id: 'envio', label: 'Envío y cinta', icon: Truck },
+  { id: 'categorias', label: 'Emojis', icon: Smile },
   { id: 'seo', label: 'SEO y pixel', icon: Search },
   { id: 'aviso', label: 'Aviso emergente', icon: Megaphone },
   { id: 'nosotros', label: 'Nosotros', icon: BookOpen },
@@ -594,6 +596,44 @@ export default function AdminSettingsPage() {
                 onChange={(e) => setBannerText(e.target.value)}
               />
             </Field>
+
+            <SaveButton onClick={saveConfig} saving={saving} />
+          </div>
+        )}
+
+        {/* ── EMOJIS DE CATEGORÍAS ── */}
+        {tab === 'categorias' && (
+          <div className="max-w-xl space-y-5">
+            <div>
+              <h2 className="text-base font-bold text-gray-900">Emojis de las categorías</h2>
+              <p className="mt-1 text-sm text-gray-500">
+                El dibujito que acompaña a cada categoría en el menú, en los filtros del catálogo y en el
+                formulario de productos. Podés pegar el que quieras (⌃⌘Espacio en Mac, tecla Windows + punto
+                en Windows). Si lo dejás vacío se usa el de siempre.
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              {AVAILABLE_CATEGORY_TILES.map((c) => (
+                <div key={c.sub} className="flex items-center gap-3 rounded-xl border border-gray-200 p-3">
+                  <input
+                    className="w-16 rounded-md border border-gray-300 px-3 py-2 text-center text-xl text-gray-900 focus:border-gray-900 focus:outline-none"
+                    maxLength={4}
+                    placeholder={c.icon}
+                    value={config.categoryIcons[c.sub] ?? ''}
+                    onChange={(e) =>
+                      set('categoryIcons', { ...config.categoryIcons, [c.sub]: e.target.value })
+                    }
+                  />
+                  <div>
+                    <p className="text-sm font-bold text-gray-900">{c.label}</p>
+                    <p className="text-xs text-gray-500">
+                      Así se ve: {categoryIcon(config.categoryIcons, c.sub, c.icon)} {c.label}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
 
             <SaveButton onClick={saveConfig} saving={saving} />
           </div>
